@@ -39,8 +39,20 @@ function App() {
     // });
   }, []);
 
-  const changeHandler = (reset = false) => {
-    setTime((prevState) => (reset ? 0 : prevState + 1));
+  const changeHandler = () => {
+    setTime(getTime.current + 1);
+  };
+  const resetHandler = () => {
+    setTime(0);
+    setStart(0);
+    setCurrent(0);
+    setEnd(0);
+    chrome.storage.sync.set({
+      start: 0,
+      progress: 0,
+      end: 0,
+    });
+    // if reset mode requested, reset timer!
   };
 
   const minHandler = (event) => {
@@ -76,7 +88,49 @@ function App() {
               setTimersID(id);
             }}
           /> */}
-          <img src="./logo.png" />
+          <img
+            onClick={() => {
+              if (getTimersID.current !== false) {
+                alert("Can't proceed while timer is active.");
+                return;
+              }
+
+              let x = prompt(
+                "Enter amount of time to load in the following format: h:mm:ss"
+              );
+
+              let timeArr = x.split(":").reverse();
+
+              if (timeArr.length !== 3) {
+                alert("Invalid input! Too many or too few fields were input.");
+                return;
+              }
+
+              if (
+                !Number.isInteger(+timeArr[0]) ||
+                !Number.isInteger(+timeArr[1]) ||
+                !Number.isInteger(+timeArr[2])
+              ) {
+                alert("Invalid input! All fields must be integers.");
+                return;
+              }
+
+              //All checks passed, now we're diving in to the addition.
+
+              let desiredTimeInSeconds =
+                +timeArr[0] +
+                +timeArr[1] * 60 +
+                +timeArr[2] * 3600 +
+                getTime.current;
+
+              setTime(desiredTimeInSeconds);
+
+              chrome.storage.sync.set({
+                savedTime: desiredTimeInSeconds,
+              });
+            }}
+            src="./logo.png"
+          />
           <ItemData
             itemMin={getStart}
             itemMax={getEnd}
@@ -90,6 +144,7 @@ function App() {
               setTimersID(id);
             }}
             onTick={changeHandler}
+            onReset={resetHandler}
           />
         </p>
       </header>

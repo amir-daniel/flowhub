@@ -42,11 +42,21 @@ const ItemData = (props) => {
     let totalMins = props.time.current / 60;
 
     if (
-      props.time.current < 1 ||
-      totalProgress === 0 ||
-      (!props.timerID.current && props.itemMax != props.progress)
+      !props.timerID.current &
+      (props.progress === props.itemMin ||
+        props.itemMax != props.progress ||
+        props.progress === null || // these 3 nulls are to wait for the data to load
+        props.itemMax === null ||
+        props.itemMin === null)
     ) {
-      return "∞";
+      return "";
+    }
+
+    if (
+      props.timerID.current &&
+      (props.time.current < 1 || totalProgress === 0)
+    ) {
+      return " ∞";
     }
 
     if (progressLeft === 0) {
@@ -54,7 +64,7 @@ const ItemData = (props) => {
         clearInterval(props.timerID.current);
         props.setTimerID(false);
       }
-      return "✅";
+      return " ✅";
     }
 
     let paceInMins = totalProgress / totalMins;
@@ -64,6 +74,7 @@ const ItemData = (props) => {
     let ETADate = new Date(Date.now() + millisecondsLeft);
     let dateFormatted = (
       <span>
+        {" "}
         <AnimatedCounter
           key={"h"}
           value={ETADate.getHours()}
@@ -141,14 +152,17 @@ const ItemData = (props) => {
       <br />
       <br />
       <Timer
-        value={props.time}
+        timerID={props.timerID}
+        modifyTimerID={props.setTimerID}
         onTick={() => {
           inputRef.current.focus();
           props.onTick();
         }}
-        timerID={props.timerID}
-        modifyTimerID={props.setTimerID}
-        // onStart={useFocus}
+        isResettable={
+          props.time.current >= 1 || props.progress != props.itemMin
+        }
+        onReset={props.onReset}
+        value={props.time}
       />
       <button
         autofocus="true"
@@ -180,7 +194,14 @@ const ItemData = (props) => {
         <br />
         <div style={{ fontSize: "0.9em" }}>
           {beautify(props.time.current)}
-          {` ${props.timerID.current === false ? "~" : "🔴"} `}
+          {`${
+            props.timerID.current === false ||
+            props.progress === null || // these 3 nulls are to wait for the data to load
+            props.itemMax === null ||
+            props.itemMin === null
+              ? ""
+              : "🔴"
+          }`}
           {getETA()}
         </div>
       </span>

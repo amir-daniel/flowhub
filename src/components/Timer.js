@@ -35,16 +35,15 @@ const Timer = (props) => {
 
     chrome.storage.sync.set({
       startedRecordingAt: null,
-    });
-
-    chrome.storage.sync.set({
       savedTime: props.value.current,
     });
   };
 
   const resetHandler = () => {
-    stopHandler(); // pause time recording
-    props.onTick(true); // remove time recorded -> reset === true
+    // stopHandler(); // pause time recording
+    clearInterval(props.timerID.current);
+    props.modifyTimerID(false);
+    props.onReset(); // remove time recorded -> reset === true
 
     chrome.storage.sync.set({
       startedRecordingAt: null,
@@ -62,7 +61,7 @@ const Timer = (props) => {
 
   return (
     <span>
-      <button disabled={props.value.current < 1} onClick={resetHandler}>
+      <button disabled={!props.isResettable} onClick={resetHandler}>
         ⏹️
       </button>
       <button disabled={!props.timerID.current} onClick={stopHandler}>

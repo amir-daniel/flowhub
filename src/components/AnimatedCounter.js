@@ -48,14 +48,19 @@ const AnimatedCounter = (props) => {
     );
 
     expression = Math.floor(100 * (oldValue.current + tempInc)) / 100;
-    return props.callback === undefined
-      ? expression
-      : props.callback(expression);
+    return (
+      (props.callback === undefined
+        ? expression
+        : props.callback(expression)) || oldValue.current
+    );
     // run the callback on expression if defined
   }
 
   expression = Math.floor(100 * oldValue.current) / 100;
-  return props.callback === undefined ? expression : props.callback(expression);
+  return (
+    (props.callback === undefined ? expression : props.callback(expression)) ||
+    oldValue.current
+  );
 };
 
 export default AnimatedCounter;
