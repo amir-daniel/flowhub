@@ -71,13 +71,18 @@ const ItemData = (props) => {
     let minsPerItem = 1 / paceInMins;
     let minsLeft = minsPerItem * progressLeft;
     let millisecondsLeft = minsLeft * 60 * 1000;
-    let ETADate = new Date(Date.now() + millisecondsLeft);
+    let ETADate =
+      props.itemMin === null ||
+      props.progress === null ||
+      props.itemMax === null
+        ? 0
+        : new Date(Date.now() + millisecondsLeft);
     let dateFormatted = (
       <span>
         {" "}
         <AnimatedCounter
           key={"h"}
-          value={ETADate.getHours()}
+          value={ETADate === 0 ? 0 : ETADate.getHours()}
           inc={1}
           refreshRate={24}
           callback={designDigit}
@@ -85,7 +90,7 @@ const ItemData = (props) => {
         :
         <AnimatedCounter
           key={"m"}
-          value={designDigit(ETADate.getMinutes())}
+          value={ETADate === 0 ? 0 : designDigit(ETADate.getMinutes())}
           inc={1}
           refreshRate={8}
           callback={designDigit}
@@ -200,7 +205,7 @@ const ItemData = (props) => {
             props.itemMax === null ||
             props.itemMin === null
               ? ""
-              : "🔴"
+              : " 🔴"
           }`}
           {getETA()}
         </div>
