@@ -27,18 +27,18 @@ const beautify = (time) => {
   return `${hr}h${min}m${sec}s`;
 };
 
-const beautifyForBadge = (time) => {
-  let timeInMin = time / 60;
-  let [hr, min, sec] = destructureSeconds(time);
+// const beautifyForBadge = (time) => {
+//   let timeInMin = time / 60;
+//   let [hr, min, sec] = destructureSeconds(time);
 
-  if (timeInMin < 60) {
-    // less than an hour recorded
-    return hr + ":" + min;
-  } else {
-    // at least an hour recorded
-    return min + ":" + sec;
-  }
-};
+//   if (timeInMin < 60) {
+//     // less than an hour recorded
+//     return min + ":" + sec;
+//   } else {
+//     // at least an hour recorded
+//     return hr + ":" + min;
+//   }
+// };
 
 const ItemData = (props) => {
   const inputRef = useRef(null);
@@ -139,11 +139,11 @@ const ItemData = (props) => {
     return 100 * (totalProgressMade / totalProgressPossible);
   };
 
-  useEffect(() => {
-    chrome.browserAction.setBadgeText({
-      text: beautifyForBadge(props.time.current),
-    });
-  }, [props.time.current]);
+  // useEffect(() => {
+  //   chrome.action.setBadgeText({
+  //     text: beautifyForBadge(props.time.current),
+  //   });
+  // }, [props.time]);
 
   return (
     <form onSubmit={(event) => event.preventDefault()}>
