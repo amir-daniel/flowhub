@@ -8,15 +8,36 @@ const playFile = (filepath) => {
   var audioPlayer = new Audio(chrome.runtime.getURL(filepath));
   audioPlayer.play();
 };
+
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
-const beautify = (time) => {
+
+const destructureSeconds = (time) => {
   time = Math.floor(time); // round time received in seconds
 
   let sec = designDigit(time % 60);
   let min = designDigit(((time - sec) / 60) % 60);
   let hr = (time - sec - 60 * min) / 3600;
 
+  return [hr, min, sec];
+};
+
+const beautify = (time) => {
+  let [hr, min, sec] = destructureSeconds(time);
+
   return `${hr}h${min}m${sec}s`;
+};
+
+const beautifyForBadge = (time) => {
+  let timeInMin = time / 60;
+  let [hr, min, sec] = destructureSeconds(time);
+
+  if (timeInMin < 60) {
+    // less than an hour recorded
+    return hr + ":" + min;
+  } else {
+    // at least an hour recorded
+    return min + ":" + sec;
+  }
 };
 
 const ItemData = (props) => {
@@ -119,8 +140,10 @@ const ItemData = (props) => {
   };
 
   useEffect(() => {
-    chrome.browserAction.setBadgeText({ text: "0:00" });
-  }, []);
+    chrome.browserAction.setBadgeText({
+      text: beautifyForBadge(props.time.current),
+    });
+  }, [props.time.current]);
 
   return (
     <form onSubmit={(event) => event.preventDefault()}>
