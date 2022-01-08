@@ -90,8 +90,9 @@ chrome.commands.onCommand.addListener((command) => {
   chrome.notifications.create({
     type: "progress",
     iconUrl: "/images/get_started128.png",
-    title: "lol",
-    message: "hi",
+    title: "lol 2",
+    message: "hi lol",
+    progress: 50,
   });
   // notifications.create
   // (optional string notificationId, notifications.NotificationOptions options, optional function callback):

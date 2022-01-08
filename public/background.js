@@ -4,6 +4,7 @@ let end = 0;
 let startedRecordingAt = null;
 let savedTime = null;
 let timerName = "timer";
+let etaMode = false;
 
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
@@ -78,6 +79,76 @@ const updateTimerState = (startedRecordingAt, savedTime) => {
   );
 };
 
+const getETA = () => {
+  let totalProgress = props.progress - props.itemMin;
+  let progressLeft = props.itemMax - props.progress;
+  let totalMins = props.time.current / 60;
+
+  if (
+    !props.timerID.current &
+    (props.progress === props.itemMin ||
+      props.itemMax != props.progress ||
+      props.progress === null || // these 3 nulls are to wait for the data to load
+      props.itemMax === null ||
+      props.itemMin === null)
+  ) {
+    return "";
+  }
+
+  if (
+    props.timerID.current &&
+    (props.time.current < 1 || totalProgress === 0)
+  ) {
+    return " ∞";
+  }
+
+  if (progressLeft === 0) {
+    if (props.timerID.current) {
+      // probably redundant since button disabled, remove in the future
+      clearInterval(props.timerID.current);
+      props.setTimerID(false);
+
+      chrome.storage.sync.set({
+        // does it even go into effect?
+        startedRecordingAt: null,
+        savedTime: props.time.current,
+      });
+    }
+    return " ✅";
+  }
+
+  let paceInMins = totalProgress / totalMins;
+  let minsPerItem = 1 / paceInMins;
+  let minsLeft = minsPerItem * progressLeft;
+  let millisecondsLeft = minsLeft * 60 * 1000;
+  let ETADate =
+    props.itemMin === null || props.progress === null || props.itemMax === null
+      ? 0
+      : new Date(Date.now() + millisecondsLeft);
+  let dateFormatted = (
+    <span>
+      {" "}
+      <AnimatedCounter
+        key={"h"}
+        value={ETADate === 0 ? 0 : ETADate.getHours()}
+        inc={1}
+        refreshRate={24}
+        callback={designDigit}
+      />
+      :
+      <AnimatedCounter
+        key={"m"}
+        value={ETADate === 0 ? 0 : designDigit(ETADate.getMinutes())}
+        inc={1}
+        refreshRate={8}
+        callback={designDigit}
+      />
+    </span>
+  );
+
+  return dateFormatted;
+};
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ start });
   chrome.storage.sync.set({ progress });
@@ -87,16 +158,34 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.commands.onCommand.addListener((command) => {
-  chrome.notifications.create({
-    type: "progress",
-    iconUrl: "/images/get_started128.png",
-    title: "lol",
-    message: "hi",
+  chrome.storage.sync.get(["start", "progress", "end"], (data) => {
+    chrome.notifications.create({
+      type: "progress",
+      iconUrl: "/images/get_started128.png",
+      title: "River",
+      message: `Hi there, just wanted to let you know that your progress
+      is staggering, and you are destined to be done at ${s}.`,
+      progress:
+        data.end === 0
+          ? 0
+          : Math.floor(
+              ((data.progress - data.start) / (data.end - data.start)) * 100
+            ),
+    });
+
+    if (data.startedRecordingAt !== null || data.savedTime === null) {
+      chrome.action.setBadgeText({
+        text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
+      });
+      scheduleAlarm();
+    }
   });
-  // notifications.create
-  // (optional string notificationId, notifications.NotificationOptions options, optional function callback):
-  // Error at parameter 'options': Error at property 'type':
-  // Value must be one of basic, image, list, progress.
+
+  chrome.storage.sync.set({ start });
+  chrome.storage.sync.set({ progress });
+  chrome.storage.sync.set({ end });
+  chrome.storage.sync.set({ startedRecordingAt });
+  chrome.storage.sync.set({ savedTime });
 });
 
 chrome.alarms.onAlarm.addListener(onTick);
