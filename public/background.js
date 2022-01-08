@@ -79,42 +79,19 @@ const updateTimerState = (startedRecordingAt, savedTime) => {
   );
 };
 
-const getETA = () => {
-  let totalProgress = props.progress - props.itemMin;
-  let progressLeft = props.itemMax - props.progress;
-  let totalMins = props.time.current / 60;
+const getETA = (progress, itemMin, itemMax, time) => {
+  let totalProgress = progress - itemMin;
+  let progressLeft = itemMax - progress;
+  let totalMins = time / 60;
+  const unknownETAChar = "∞";
 
   if (
-    !props.timerID.current &
-    (props.progress === props.itemMin ||
-      props.itemMax != props.progress ||
-      props.progress === null || // these 3 nulls are to wait for the data to load
-      props.itemMax === null ||
-      props.itemMin === null)
+    time < 1 ||
+    totalProgress === 0
+    // an arbitrary value of time < 1 second was chosen
+    // to designate inaccurate or insufficient enough data to provide ETA
   ) {
-    return "";
-  }
-
-  if (
-    props.timerID.current &&
-    (props.time.current < 1 || totalProgress === 0)
-  ) {
-    return " ∞";
-  }
-
-  if (progressLeft === 0) {
-    if (props.timerID.current) {
-      // probably redundant since button disabled, remove in the future
-      clearInterval(props.timerID.current);
-      props.setTimerID(false);
-
-      chrome.storage.sync.set({
-        // does it even go into effect?
-        startedRecordingAt: null,
-        savedTime: props.time.current,
-      });
-    }
-    return " ✅";
+    return unknownETAChar;
   }
 
   let paceInMins = totalProgress / totalMins;
@@ -122,29 +99,16 @@ const getETA = () => {
   let minsLeft = minsPerItem * progressLeft;
   let millisecondsLeft = minsLeft * 60 * 1000;
   let ETADate =
-    props.itemMin === null || props.progress === null || props.itemMax === null
-      ? 0
+    itemMin === null || progress === null || itemMax === null
+      ? null
       : new Date(Date.now() + millisecondsLeft);
-  let dateFormatted = (
-    <span>
-      {" "}
-      <AnimatedCounter
-        key={"h"}
-        value={ETADate === 0 ? 0 : ETADate.getHours()}
-        inc={1}
-        refreshRate={24}
-        callback={designDigit}
-      />
-      :
-      <AnimatedCounter
-        key={"m"}
-        value={ETADate === 0 ? 0 : designDigit(ETADate.getMinutes())}
-        inc={1}
-        refreshRate={8}
-        callback={designDigit}
-      />
-    </span>
-  );
+
+  let dateFormatted =
+    ETADate === null
+      ? unknownETAChar
+      : designDigit(ETADate.getHours()) +
+        ":" +
+        designDigit(ETADate.getMinutes());
 
   return dateFormatted;
 };
@@ -158,34 +122,43 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.commands.onCommand.addListener((command) => {
-  chrome.storage.sync.get(["start", "progress", "end"], (data) => {
-    chrome.notifications.create({
-      type: "progress",
-      iconUrl: "/images/get_started128.png",
-      title: "River",
-      message: `Hi there, just wanted to let you know that your progress
-      is staggering, and you are destined to be done at ${s}.`,
-      progress:
-        data.end === 0
-          ? 0
-          : Math.floor(
-              ((data.progress - data.start) / (data.end - data.start)) * 100
-            ),
-    });
-
-    if (data.startedRecordingAt !== null || data.savedTime === null) {
-      chrome.action.setBadgeText({
-        text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
-      });
-      scheduleAlarm();
-    }
-  });
-
   chrome.storage.sync.set({ start });
-  chrome.storage.sync.set({ progress });
+
   chrome.storage.sync.set({ end });
   chrome.storage.sync.set({ startedRecordingAt });
   chrome.storage.sync.set({ savedTime });
+
+  chrome.storage.sync.get(
+    ["start", "progress", "end", "startedRecordingAt"],
+    (data) => {
+      if (data.progress < data.end && startedRecordingAt !== null) {
+        chrome.storage.sync.set({ progress: data.progress + 1 });
+        // don't forget to update in Timer.js the checker
+        chrome.notifications.create({
+          type: "progress",
+          iconUrl: "/images/get_started128.png",
+          title: "River",
+          message: `Hi there, just wanted to let you know that your progress ${
+            data.progress + 1 === data.end // it's progress + 1,
+              ? // noticed that we incremented it a few lines ago
+                "was staggering, and you are done! ✅"
+              : `is staggering, and you are destined to be done at ${getETA(
+                  data.progress + 1,
+                  data.start,
+                  data.end,
+                  (Date.now() - data.startedRecordingAt) / 1000
+                )}.`
+          } `,
+          progress:
+            data.end === 0
+              ? 0
+              : Math.floor(
+                  ((data.progress - data.start) / (data.end - data.start)) * 100
+                ),
+        });
+      }
+    }
+  );
 });
 
 chrome.alarms.onAlarm.addListener(onTick);

@@ -41,7 +41,12 @@ function App() {
 
   const changeHandler = () => {
     setTime(getTime.current + 1);
+    //update progress values from storage
+    chrome.storage.sync.get(["progress"], (data) => {
+      setCurrent(data.progress);
+    });
   };
+
   const resetHandler = () => {
     setTime(0);
     setStart(0);

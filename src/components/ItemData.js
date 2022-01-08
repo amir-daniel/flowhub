@@ -65,7 +65,7 @@ const ItemData = (props) => {
     if (
       !props.timerID.current &
       (props.progress === props.itemMin ||
-        props.itemMax != props.progress ||
+        props.itemMax !== props.progress ||
         props.progress === null || // these 3 nulls are to wait for the data to load
         props.itemMax === null ||
         props.itemMin === null)
@@ -118,7 +118,7 @@ const ItemData = (props) => {
         :
         <AnimatedCounter
           key={"m"}
-          value={ETADate === 0 ? 0 : designDigit(ETADate.getMinutes())}
+          value={ETADate === 0 ? 0 : ETADate.getMinutes()}
           inc={1}
           refreshRate={8}
           callback={designDigit}
