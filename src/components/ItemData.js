@@ -118,6 +118,10 @@ const ItemData = (props) => {
     return 100 * (totalProgressMade / totalProgressPossible);
   };
 
+  useEffect(() => {
+    chrome.browserAction.setBadgeText({ text: "0:00" });
+  }, []);
+
   return (
     <form onSubmit={(event) => event.preventDefault()}>
       <input
@@ -181,20 +185,7 @@ const ItemData = (props) => {
       >
         ⬆️
       </button>
-      <span
-
-      // style={{
-      //   color: props.timerID.current
-      //     ? getPercentage() < 100
-      //       ? getPercentage() < 50
-      //         ? "rgb(197, 52, 52)"
-      //         : "rgb(209, 135, 51)"
-      //       : "rgb(32, 189, 17)"
-      //     : props.progress === props.itemMax && props.itemMax !== 0
-      //     ? "rgb(32, 189, 17)"
-      //     : "rgb(255,255,255)",
-      // }
-      >
+      <span>
         <br />
         <br />
         <div style={{ fontSize: "0.9em" }}>
