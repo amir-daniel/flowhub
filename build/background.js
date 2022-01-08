@@ -46,9 +46,6 @@ const onTick = () => {
       scheduleAlarm();
     }
   });
-  // startedRecordingAt is not supposed to be null
-  // probably timer was activated by mistake, let's clear it
-  // chrome.alarms.clear(timerName);
 };
 
 const updateTimerState = (startedRecordingAt, savedTime) => {
@@ -87,6 +84,19 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ end });
   chrome.storage.sync.set({ startedRecordingAt });
   chrome.storage.sync.set({ savedTime });
+});
+
+chrome.commands.onCommand.addListener((command) => {
+  chrome.notifications.create({
+    type: "progress",
+    iconUrl: "/images/get_started128.png",
+    title: "lol",
+    message: "hi",
+  });
+  // notifications.create
+  // (optional string notificationId, notifications.NotificationOptions options, optional function callback):
+  // Error at parameter 'options': Error at property 'type':
+  // Value must be one of basic, image, list, progress.
 });
 
 chrome.alarms.onAlarm.addListener(onTick);

@@ -86,6 +86,19 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ savedTime });
 });
 
+chrome.commands.onCommand.addListener((command) => {
+  chrome.notifications.create({
+    type: "progress",
+    iconUrl: "/images/get_started128.png",
+    title: "lol",
+    message: "hi",
+  });
+  // notifications.create
+  // (optional string notificationId, notifications.NotificationOptions options, optional function callback):
+  // Error at parameter 'options': Error at property 'type':
+  // Value must be one of basic, image, list, progress.
+});
+
 chrome.alarms.onAlarm.addListener(onTick);
 
 chrome.runtime.onStartup.addListener(updateTimerState);

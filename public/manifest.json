@@ -13,12 +13,17 @@
     "alarms"
   ],
   "commands": {
-    "_execute_action": {
+    "progress-up": {
       "suggested_key": {
-        "default": "Ctrl+Shift+F",
-        "mac": "MacCtrl+Shift+F"
+        "default": "Ctrl+PageUp"
       },
-      "description": "Opens hello.html"
+      "description": "Increment progress by 1"
+    },
+    "change-view": {
+      "suggested_key": {
+        "default": "Ctrl+PageDown"
+      },
+      "description": "Change Badge view (ETA vs. time elapsed)"
     }
   },
 
