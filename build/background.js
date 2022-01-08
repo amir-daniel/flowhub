@@ -4,6 +4,7 @@ let end = 0;
 let startedRecordingAt = null;
 let savedTime = null;
 let timerName = "timer";
+let etaMode = false;
 
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
@@ -78,6 +79,40 @@ const updateTimerState = (startedRecordingAt, savedTime) => {
   );
 };
 
+const getETA = (progress, itemMin, itemMax, time) => {
+  let totalProgress = progress - itemMin;
+  let progressLeft = itemMax - progress;
+  let totalMins = time / 60;
+  const unknownETAChar = "∞";
+
+  if (
+    time < 1 ||
+    totalProgress === 0
+    // an arbitrary value of time < 1 second was chosen
+    // to designate inaccurate or insufficient enough data to provide ETA
+  ) {
+    return unknownETAChar;
+  }
+
+  let paceInMins = totalProgress / totalMins;
+  let minsPerItem = 1 / paceInMins;
+  let minsLeft = minsPerItem * progressLeft;
+  let millisecondsLeft = minsLeft * 60 * 1000;
+  let ETADate =
+    itemMin === null || progress === null || itemMax === null
+      ? null
+      : new Date(Date.now() + millisecondsLeft);
+
+  let dateFormatted =
+    ETADate === null
+      ? unknownETAChar
+      : designDigit(ETADate.getHours()) +
+        ":" +
+        designDigit(ETADate.getMinutes());
+
+  return dateFormatted;
+};
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ start });
   chrome.storage.sync.set({ progress });
@@ -87,17 +122,46 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.commands.onCommand.addListener((command) => {
-  chrome.notifications.create({
-    type: "progress",
-    iconUrl: "/images/get_started128.png",
-    title: "lol 2",
-    message: "hi lol",
-    progress: 50,
-  });
-  // notifications.create
-  // (optional string notificationId, notifications.NotificationOptions options, optional function callback):
-  // Error at parameter 'options': Error at property 'type':
-  // Value must be one of basic, image, list, progress.
+  chrome.storage.sync.get(
+    ["start", "progress", "end", "startedRecordingAt"],
+    (data) => {
+      if (data.progress < data.end && data.startedRecordingAt !== null) {
+        chrome.storage.sync.set("goodnews", { progress: data.progress + 1 });
+        // don't forget to update in Timer.js the checker
+        chrome.notifications.create({
+          type: "progress",
+          iconUrl: "/images/get_started128.png",
+          title: "River",
+          message: `Hi there, just wanted to let you know that your progress ${
+            data.progress + 1 === data.end // it's progress + 1,
+              ? // noticed that we incremented it a few lines ago
+                "was staggering, and you are done! ✅"
+              : `is staggering, and you are destined to be done at ${getETA(
+                  data.progress + 1,
+                  data.start,
+                  data.end,
+                  (Date.now() - data.startedRecordingAt) / 1000
+                )}.`
+          } `,
+          progress:
+            data.end === 0
+              ? 0
+              : Math.floor(
+                  ((data.progress + 1 - data.start) / (data.end - data.start)) *
+                    100
+                ),
+        });
+      } else {
+        chrome.notifications.create("alarm", {
+          type: "progress",
+          iconUrl: "/images/get_started128.png",
+          title: "River",
+          message: "Something went wrong!",
+          progress: 0,
+        });
+      }
+    }
+  );
 });
 
 chrome.alarms.onAlarm.addListener(onTick);
