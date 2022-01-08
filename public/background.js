@@ -46,6 +46,9 @@ const onTick = () => {
       scheduleAlarm();
     }
   });
+  // startedRecordingAt is not supposed to be null
+  // probably timer was activated by mistake, let's clear it
+  // chrome.alarms.clear(timerName);
 };
 
 const updateTimerState = (startedRecordingAt, savedTime) => {
