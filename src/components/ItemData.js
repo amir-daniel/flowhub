@@ -82,8 +82,15 @@ const ItemData = (props) => {
 
     if (progressLeft === 0) {
       if (props.timerID.current) {
+        // probably redundant since button disabled, remove in the future
         clearInterval(props.timerID.current);
         props.setTimerID(false);
+
+        chrome.storage.sync.set({
+          // does it even go into effect?
+          startedRecordingAt: null,
+          savedTime: props.time.current,
+        });
       }
       return " ✅";
     }
@@ -192,6 +199,9 @@ const ItemData = (props) => {
         }}
         isResettable={
           props.time.current >= 1 || props.progress != props.itemMin
+        }
+        isRecordable={
+          +props.progress !== +props.itemMax || +props.itemMin === props.itemMax
         }
         onReset={props.onReset}
         value={props.time}

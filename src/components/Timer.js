@@ -67,7 +67,11 @@ const Timer = (props) => {
       <button disabled={!props.timerID.current} onClick={stopHandler}>
         ⏸️
       </button>
-      <button disabled={props.timerID.current} onClick={startHandler}>
+      <button
+        disabled={props.timerID.current !== false || !props.isRecordable}
+        // seems somewhat redundant
+        onClick={startHandler}
+      >
         ▶️
       </button>
     </span>
