@@ -3,7 +3,7 @@ let progress = 0;
 let end = 0;
 let startedRecordingAt = null;
 let savedTime = null;
-let timerID = null;
+let timerName = "timer";
 
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
@@ -30,6 +30,24 @@ const beautifyForBadge = (time) => {
   }
 };
 
+const scheduleAlarm = () => {
+  let alarmInfo = {
+    when: Date.now() + 1000,
+  };
+  chrome.alarms.create(timerName, alarmInfo);
+};
+
+const onTick = () => {
+  chrome.storage.sync.get(["startedRecordingAt", "savedTime"], (data) => {
+    if (data.startedRecordingAt !== null && data.savedTime === null) {
+      chrome.action.setBadgeText({
+        text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
+      });
+    }
+    scheduleAlarm();
+  });
+};
+
 const updateTimerState = (startedRecordingAt, savedTime) => {
   chrome.storage.sync.get(["startedRecordingAt", "savedTime"], (data) => {
     startedRecordingAt = data.startedRecordingAt;
@@ -47,7 +65,7 @@ const updateTimerState = (startedRecordingAt, savedTime) => {
       }
     } else {
       chrome.action.setBadgeBackgroundColor({ color: "#800000" }); // red color
-      timerID = setInterval(onTick, 1000);
+      scheduleAlarm();
     }
   });
 };
@@ -58,27 +76,17 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ end });
   chrome.storage.sync.set({ startedRecordingAt });
   chrome.storage.sync.set({ savedTime });
-  // chrome.action.setBadgeBackgroundColor({ color: "#953553" });
-  // updateTimerState();
 });
+
+chrome.alarms.onAlarm.addListener(onTick);
 
 chrome.runtime.onStartup.addListener(updateTimerState);
 
-const onTick = () => {
-  chrome.storage.sync.get(["startedRecordingAt", "savedTime"], (data) => {
-    if (data.startedRecordingAt !== null && data.savedTime === null) {
-      chrome.action.setBadgeText({
-        text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
-      });
-    }
-  });
-};
-
-chrome.storage.onChanged.addListener((changes, namespace) => {
+chrome.storage.onChanged.addListener((changes) => {
   if ("startedRecordingAt" in changes) {
     if (changes.startedRecordingAt.newValue === null) {
       // recording stopped, clear timer
-      clearInterval(timerID);
+      chrome.alarms.clear(timerName);
     }
   }
 
