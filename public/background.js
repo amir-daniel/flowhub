@@ -123,10 +123,10 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.commands.onCommand.addListener((command) => {
   chrome.storage.sync.get(
-    ["start", "progress", "end", "startedRecordingAt"],
+    ["start", "progress", "end", "startedRecordingAt", "savedTime"],
     (data) => {
       if (data.progress < data.end && data.startedRecordingAt !== null) {
-        chrome.storage.sync.set("goodnews", { progress: data.progress + 1 });
+        chrome.storage.sync.set({ progress: data.progress + 1 });
         // don't forget to update in Timer.js the checker
         chrome.notifications.create({
           type: "progress",
@@ -151,8 +151,20 @@ chrome.commands.onCommand.addListener((command) => {
                     100
                 ),
         });
+        if (data.progress + 1 === data.end) {
+          chrome.alarms.clearAll();
+          chrome.storage.sync.set(
+            {
+              startedRecordingAt: null,
+              savedTime: (Date.now() - data.startedRecordingAt) / 1000,
+            },
+            () => {
+              updateTimerState();
+            }
+          );
+        }
       } else {
-        chrome.notifications.create("alarm", {
+        chrome.notifications.create({
           type: "progress",
           iconUrl: "/images/get_started128.png",
           title: "River",
