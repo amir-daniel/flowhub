@@ -39,35 +39,43 @@ const scheduleAlarm = () => {
 
 const onTick = () => {
   chrome.storage.sync.get(["startedRecordingAt", "savedTime"], (data) => {
-    if (data.startedRecordingAt !== null && data.savedTime === null) {
+    if (data.startedRecordingAt !== null || data.savedTime === null) {
       chrome.action.setBadgeText({
         text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
       });
+      scheduleAlarm();
     }
-    scheduleAlarm();
   });
 };
 
 const updateTimerState = (startedRecordingAt, savedTime) => {
-  chrome.storage.sync.get(["startedRecordingAt", "savedTime"], (data) => {
-    startedRecordingAt = data.startedRecordingAt;
-    savedTime = data.savedTime;
+  chrome.storage.sync.get(
+    ["startedRecordingAt", "savedTime", "start", "progress", "end"],
+    (data) => {
+      startedRecordingAt = data.startedRecordingAt;
+      savedTime = data.savedTime;
 
-    if (startedRecordingAt === null) {
-      // not recording
-      chrome.action.setBadgeBackgroundColor({ color: "#777" }); // grey color
-      if (savedTime !== null) {
-        chrome.action.setBadgeText({
-          text: beautifyForBadge(savedTime),
-        });
+      if (startedRecordingAt === null) {
+        // not recording
+        if (data.end === data.progress && data.progress !== data.start) {
+          chrome.action.setBadgeBackgroundColor({ color: "#50C878" }); // green color
+        } else {
+          chrome.action.setBadgeBackgroundColor({ color: "#777" }); // grey color
+        }
+
+        if (savedTime !== null) {
+          chrome.action.setBadgeText({
+            text: beautifyForBadge(savedTime),
+          });
+        } else {
+          chrome.action.setBadgeText({ text: "?" });
+        }
       } else {
-        chrome.action.setBadgeText({ text: "?" });
+        chrome.action.setBadgeBackgroundColor({ color: "#800000" }); // red color
+        scheduleAlarm();
       }
-    } else {
-      chrome.action.setBadgeBackgroundColor({ color: "#800000" }); // red color
-      scheduleAlarm();
     }
-  });
+  );
 };
 
 chrome.runtime.onInstalled.addListener(() => {
