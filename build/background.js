@@ -1,10 +1,12 @@
 let start = 0;
 let progress = 0;
 let end = 0;
+let totalSeconds = 0;
 let startedRecordingAt = null;
 let savedTime = null;
 let timerName = "timer";
 let etaMode = false;
+let userName = "River";
 
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
@@ -39,14 +41,19 @@ const scheduleAlarm = () => {
 };
 
 const onTick = () => {
-  chrome.storage.sync.get(["startedRecordingAt", "savedTime"], (data) => {
-    if (data.startedRecordingAt !== null || data.savedTime === null) {
-      chrome.action.setBadgeText({
-        text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
-      });
-      scheduleAlarm();
+  chrome.storage.sync.get(
+    ["startedRecordingAt", "savedTime", "totalSeconds"],
+    (data) => {
+      if (data.startedRecordingAt !== null || data.savedTime === null) {
+        chrome.action.setBadgeText({
+          text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
+        });
+
+        chrome.storage.sync.set({ totalSeconds: data.totalSeconds + 1 });
+        scheduleAlarm();
+      }
     }
-  });
+  );
 };
 
 const updateTimerState = (startedRecordingAt, savedTime) => {
@@ -119,6 +126,8 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ end });
   chrome.storage.sync.set({ startedRecordingAt });
   chrome.storage.sync.set({ savedTime });
+  chrome.storage.sync.set({ userName });
+  chrome.storage.sync.set({ totalSeconds });
 });
 
 chrome.commands.onCommand.addListener((command) => {
