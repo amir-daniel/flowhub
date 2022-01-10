@@ -1,39 +1,143 @@
-.App {
-  text-align: center;
+body {
+  font-size: 14px;
+  line-height: 1.4;
+}
+.Card {
+  color: #f1f3f9;
+  background-color: #111213;
+  width: 360px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.Card-header {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-  width: 13em;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 0 12px;
+  border-bottom: 1px solid #2f3237;
+  background-color: #1d1e20;
 }
 
-.App-link {
-  color: #61dafb;
+.headline {
+  font-size: 14px;
+  line-height: 24px;
+  margin: 0;
+  font-weight: 600;
+  text-decoration: none;
+  display: block;
+  padding: 2px 8px 2px 20px;
+  margin-left: -8px;
+  transition: background-color 1s;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.headline:hover {
+  background-color: #2f3237;
+}
+
+.mode {
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 12px;
+  line-height: 16px;
+  background-color: #badfff;
+  color: #1976f0;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  text-transform: capitalize;
+  font-weight: 700;
+}
+.mode:hover {
+  background-color: #1976f0;
+  color: #badfff;
+}
+
+.Card-layout {
+  border-bottom: 1px solid #2f3237;
+  display: block;
+  color: #f1f3f9;
+}
+
+.initialize-data {
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+}
+
+.data-row {
+  padding: 1px 1px 5px 1px;
+}
+
+.data-input {
+  border-top: 0;
+  border-bottom: 1px solid #1a3564;
+  border-left: 0;
+  border-right: 0;
+  background-color: #111213;
+  width: 80px;
+  text-indent: 4px;
+  text-align: left;
+  color: #2f3237;
+  transition: background-color 0.4s;
+  border-radius: 3px;
+  padding: 3px 0 3px 0;
+}
+
+.data-input::placeholder {
+  color: #2f3237;
+}
+.data-input:hover::placeholder {
+  color: #5c4004;
+}
+.data-input:focus::placeholder {
+  color: #5c4004;
+}
+.data-input:hover {
+  background-color: #ebb82d;
+  color: #5c4004;
+}
+
+.data-input:focus {
+  background-color: #ebb82d;
+  color: #5c4004;
+}
+.seperated {
+  border-bottom: 1px solid #2f3237;
+  padding: 8px 12px 8px;
+  cursor: pointer;
+}
+
+.datasection {
+  transition: background-color 0.4s;
+}
+
+.datasection:hover {
+  background-color: #2f3237;
+}
+
+.actions {
+  padding: 8px 12px 8px;
+  margin: 0px 0px 8px 0px;
+}
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+}
+
+button {
+  background-color: #f8ecdb;
+  width: 90px;
+  border: 0 transparent;
+  border-radius: 4px;
+  line-height: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.4s;
+  padding: 4px 8px;
+}
+button:hover {
+  background-color: #ebb82d;
 }
