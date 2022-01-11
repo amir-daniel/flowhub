@@ -2,15 +2,20 @@
 import "./App.css";
 import NumberInput from "./components/NumberInput";
 import Timer from "./components/Timer";
-import { useState, useEffect, useRef, useReducer } from "react";
+import BufferElement from "./components/BufferElement";
+import AnimatedProgressBar from "./components/AnimatedProgressBar";
+import { useState, useEffect, useReducer, useRef } from "react";
 
 function App() {
   // ETA Mode (Forward Looking),
   // Sequential Mode (Time Elapsed)
 
+  const [isBuffering, setIsBuffering] = useState(false);
+  const isInInitialization = useRef(true); // to signal to the buffer not to load while first initializing
+
   const filterInput = (newInput, oldInput) => {
-    if (+newInput === 0) {
-      return "";
+    if ((newInput + "")?.trim() === "") {
+      return 0;
     }
     return Number.isInteger(+newInput) ? +newInput : +oldInput;
   };
@@ -27,11 +32,15 @@ function App() {
         timerID: state.timerID,
       };
     } else if (action.type === "USER_ADDTIME") {
+      chrome.storage.sync.set({
+        startedRecordingAt: null,
+        savedTime: +state.time + action.value,
+      });
       return {
         start: state.start,
         current: state.current,
         end: state.end,
-        time: +state.time + action.time,
+        time: +state.time + action.value,
         total: state.total,
         timerID: state.timerID,
       };
@@ -76,6 +85,10 @@ function App() {
       };
     } else if (action.type === "TIME_RESET") {
       clearInterval(state.timerID);
+      chrome.storage.sync.set({
+        startedRecordingAt: null,
+        savedTime: null,
+      });
       return {
         start: state.start,
         current: state.current,
@@ -86,6 +99,10 @@ function App() {
       };
     } else if (action.type === "FULL_RESET") {
       clearInterval(state.timerID);
+      chrome.storage.sync.set({
+        startedRecordingAt: null,
+        savedTime: null,
+      });
       return {
         start: 0,
         current: 0,
@@ -95,21 +112,41 @@ function App() {
         timerID: false,
       };
     } else if (action.type === "MODIFY_TIMERID") {
+      chrome.storage.sync.get(["startedRecordingAt"], (data) => {
+        if (data.startedRecordingAt === null) {
+          chrome.storage.sync.set({
+            startedRecordingAt: Date.now() - +state.time * 1000,
+            savedTime: null,
+          });
+        }
+      });
       return {
         start: state.start,
         current: state.current,
         end: state.end,
-        time: state.time,
+        time: null,
         total: state.total,
         timerID: action.value,
       };
+    } else if (action.type === "TIME_START") {
+      throw new Error(); // this area is now deprecated!
     } else if (action.type === "TIME_PAUSE") {
+      let newTime = null;
       clearInterval(state.timerID);
+
+      if (action.value !== null) {
+        newTime = (Date.now() - action.value) / 1000;
+        chrome.storage.sync.set({
+          startedRecordingAt: null,
+          savedTime: newTime,
+        });
+      }
+
       return {
         start: state.start,
         current: state.current,
         end: state.end,
-        time: state.time,
+        time: newTime,
         total: state.total,
         timerID: false,
       };
@@ -126,9 +163,6 @@ function App() {
   });
 
   let [getUserName, setUserName] = useState(null);
-  let getTimersID = useRef(); // TODO: remove the ref
-
-  getTimersID.current = dataState.timerID;
 
   useEffect(() => {
     // initialize some variables from chrome storage
@@ -150,37 +184,40 @@ function App() {
               ? data.savedTime === null
                 ? null
                 : data.savedTime
-              : (Date.now() - data.startedRecordingAt) / 1000,
+              : null,
           start: data.start,
           current: data.progress,
           end: data.end,
           total: data.totalSeconds,
         });
         setUserName(data.userName);
+        isInInitialization.current = false;
       }
     );
   }, []);
 
   useEffect(() => {
-    // update variables
-    chrome.storage.sync.set({
-      start: dataState.start,
-      progress: dataState.current,
-      end: dataState.end,
-      startedRecordingAt:
-        dataState.timerID === false ? null : Date.now() - dataState.time * 1000,
-      savedTime: dataState.timerID === false ? dataState.time : null,
-    });
-  }, [
-    dataState.start,
-    dataState.current,
-    dataState.end,
-    dataState.timerID,
-    dataState.time,
-  ]);
+    // update variables in a debounced way (to avoid going over the 1800 MAX_WRITE_OPERATIONS / hr)
+    let delayedUpdate;
+    if (!isInInitialization.current) {
+      // don't write back values on first initializating
+      delayedUpdate = setTimeout(() => {
+        chrome.storage.sync.set({
+          start: dataState.start,
+          progress: dataState.current,
+          end: dataState.end,
+        });
+        setIsBuffering(false);
+      }, 2000); // add buffering
+      setIsBuffering(true);
+      return () => {
+        clearTimeout(delayedUpdate);
+      };
+    }
+  }, [dataState.start, dataState.current, dataState.end]);
 
   const timeAddHandler = () => {
-    if (getTimersID.current !== false) {
+    if (dataState.timerID !== false) {
       alert("Can't proceed while timer is active.");
       return;
     }
@@ -209,11 +246,7 @@ function App() {
     let desiredTimeInSeconds =
       +timeArr[0] + +timeArr[1] * 60 + +timeArr[2] * 3600;
 
-    chrome.storage.sync.set({
-      savedTime:
-        desiredTimeInSeconds +
-        dataDispatch({ type: "USER_ADDTIME", time: desiredTimeInSeconds }).time,
-    });
+    dataDispatch({ type: "USER_ADDTIME", value: desiredTimeInSeconds });
   };
 
   const nameChangeHandler = () => {
@@ -250,7 +283,9 @@ function App() {
 
       <div className="Card-layout">
         <div className="stats seperated datasection">
-          <div>Stats</div>
+          <div>
+            <b>Stats</b>
+          </div>
           <div>
             You have in total <b>{Math.round(dataState.total / 3600)}</b>{" "}
             recorded hours.
@@ -260,6 +295,7 @@ function App() {
           <div className="data-row">
             <div>Start</div>
             <NumberInput
+              min={0}
               className="data-input"
               placeholder="0"
               onChange={(event) => {
@@ -268,7 +304,7 @@ function App() {
                   value: event.target.value,
                 });
               }}
-              value={dataState.start}
+              value={+dataState.start === 0 ? "" : dataState.start}
             />
           </div>
           <div className="data-row">
@@ -282,7 +318,7 @@ function App() {
                   value: event.target.value,
                 });
               }}
-              value={dataState.current}
+              value={+dataState.current === 0 ? "" : dataState.current}
             />
           </div>
           <div className="data-row">
@@ -293,7 +329,7 @@ function App() {
               onChange={(event) => {
                 dataDispatch({ type: "END_CHANGE", value: event.target.value });
               }}
-              value={dataState.end}
+              value={+dataState.end === 0 ? "" : dataState.end}
             />
           </div>
         </div>
@@ -306,16 +342,28 @@ function App() {
             >
               Reset
             </button>
+            <BufferElement
+              isActive={isBuffering}
+              isInitializing={isInInitialization}
+            />
             <Timer
-              timerID={getTimersID}
+              timerID={dataState.timerID}
               modifyTimerID={(value) => {
-                dataDispatch({ type: "MODIFY_TIMERID", value });
+                dataDispatch({ type: "MODIFY_TIMERID", value: value });
               }}
               onTick={tickHandler}
-              onPause={() => dataDispatch({ type: "TIME_PAUSE" })}
+              onPause={() =>
+                chrome.storage.sync.get(["startedRecordingAt"], (data) => {
+                  dataDispatch({
+                    type: "TIME_PAUSE",
+                    value: data.startedRecordingAt,
+                  });
+                })
+              }
             />
           </div>
         </div>
+        <AnimatedProgressBar />
       </div>
     </div>
   );

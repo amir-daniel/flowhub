@@ -7,7 +7,7 @@ const Timer = (props) => {
   };
 
   const startHandler = () => {
-    if (props.timerID.current === false) {
+    if (props.timerID === false) {
       props.modifyTimerID(
         setInterval(() => {
           tickHandler();
@@ -27,14 +27,14 @@ const Timer = (props) => {
   return (
     <button
       onClick={() => {
-        if (props.timerID.current === false) {
+        if (props.timerID === false) {
           startHandler();
         } else {
           props.onPause();
         }
       }}
     >
-      {props.timerID.current === false ? "Record" : "Pause"}
+      {props.timerID === false ? "Record" : "Pause"}
     </button>
   );
 };
