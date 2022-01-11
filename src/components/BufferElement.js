@@ -14,11 +14,10 @@ const BufferElement = (props) => {
     ) {
       // don't show loading screen on first initialization
       isFirstRender.current = false;
-      return <></>;
+      setMessage(false);
     } else if (props.isInitializing.current === true) {
-      return <></>;
-    }
-    if (props.isActive === false) {
+      setMessage(false);
+    } else if (props.isActive === false) {
       setMessage(
         <div>
           <svg
@@ -62,7 +61,8 @@ const BufferElement = (props) => {
       clearTimeout(cleaningTimer);
     };
   }, [props.isActive, props.isInitializing.current]);
-  return message;
+
+  return message == false ? props.timeDisplay : message;
 };
 
 export default BufferElement;

@@ -16,6 +16,24 @@ function App() {
 
   isBufferingRef.current = isBuffering;
 
+  const designDigit = (num) => (+num < 10 ? "0" + num : num);
+
+  const destructureSeconds = (time) => {
+    time = Math.round(time); // round time received in seconds
+
+    let sec = designDigit(time % 60);
+    let min = designDigit(((time - sec) / 60) % 60);
+    let hr = (time - sec - 60 * min) / 3600;
+
+    return [hr, min, sec];
+  };
+
+  const beautify = (time) => {
+    let [hr, min, sec] = destructureSeconds(time);
+
+    return `${hr}h${min}m${sec}s`;
+  };
+
   const filterInput = (newInput, oldInput) => {
     if ((newInput + "")?.trim() === "") {
       return 0;
@@ -40,6 +58,8 @@ function App() {
         current: action.progress,
         end: action.end,
         total: action.totalSeconds,
+        time: state.time,
+        timerID: state.timerID,
       };
     } else if (action.type === "USER_ADDTIME") {
       chrome.storage.sync.set({
@@ -173,6 +193,23 @@ function App() {
   });
 
   let [getUserName, setUserName] = useState(null);
+  let [timeToShow, setTimeToShow] = useState(false); // it's false here to suit the JSX element later
+
+  useEffect(() => {
+    if (dataState.timerID === false) {
+      if (dataState.time > 0) {
+        setTimeToShow(dataState.time);
+      } else {
+        setTimeToShow(false);
+      }
+    } else {
+      chrome.storage.sync.get(["startedRecordingAt"], (data) => {
+        if (data.startedRecordingAt !== null) {
+          setTimeToShow((Date.now() - data.startedRecordingAt) / 1000);
+        }
+      });
+    }
+  }, [dataState.timerID, dataState.time]);
 
   useEffect(() => {
     // initialize some variables from chrome storage
@@ -224,10 +261,10 @@ function App() {
         );
       }, 2000); // add buffering
       setIsBuffering(true);
-      return () => {
-        clearTimeout(delayedUpdate);
-      };
     }
+    return () => {
+      clearTimeout(delayedUpdate);
+    };
   }, [dataState.start, dataState.current, dataState.end]);
 
   const timeAddHandler = () => {
@@ -274,7 +311,7 @@ function App() {
   const tickHandler = () => {
     if (isBufferingRef.current === false) {
       chrome.storage.sync.get(
-        ["start", "progress", "end", "totalSeconds"],
+        ["start", "progress", "end", "totalSeconds", "startedRecordingAt"],
         (data) => {
           dataDispatch({
             type: "DATA_REFRESH",
@@ -283,6 +320,9 @@ function App() {
             end: data.end,
             totalSeconds: data.totalSeconds,
           });
+          setTimeToShow(
+            (Date.now() - data.startedRecordingAt) / 1000 // add 1 second to account for delay
+          );
         }
       );
     }
@@ -363,12 +403,15 @@ function App() {
             <BufferElement
               isActive={isBuffering}
               isInitializing={isInInitialization}
+              timeDisplay={
+                timeToShow !== false ? beautify(timeToShow) : timeToShow
+              }
             />
             <Timer
               autoFocus={true}
               timerID={dataState.timerID}
-              modifyTimerID={(value) => {
-                dataDispatch({ type: "MODIFY_TIMERID", value: value });
+              modifyTimerID={(newID) => {
+                dataDispatch({ type: "MODIFY_TIMERID", value: newID });
               }}
               onTick={tickHandler}
               onPause={() =>
