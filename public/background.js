@@ -10,6 +10,7 @@ let userName = "River";
 const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
 let mode = 0; // for now it's local, and not accessable from the popup
+const unknownETAChar = "∞";
 
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
@@ -95,7 +96,7 @@ const updateTimerState = () => {
 
         if (data.savedTime !== null) {
           // not recording but some time is saved
-          if (data.mode === ELAPSED_MODE) {
+          if (data.mode === 0) {
             chrome.action.setBadgeText({
               text: beautifyForBadge(data.savedTime),
             });
@@ -125,7 +126,6 @@ const getETA = (progress, itemMin, itemMax, time) => {
   let totalProgress = progress - itemMin;
   let progressLeft = itemMax - progress;
   let totalMins = time / 60;
-  const unknownETAChar = "∞";
 
   if (
     time < 1 ||
