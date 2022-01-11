@@ -62,7 +62,11 @@ const BufferElement = (props) => {
     };
   }, [props.isActive, props.isInitializing.current]);
 
-  return message == false ? props.timeDisplay : message;
+  return message == false ? (
+    <div style={{ paddingTop: "4px" }}>{props.timeDisplay}</div>
+  ) : (
+    message
+  );
 };
 
 export default BufferElement;

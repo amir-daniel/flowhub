@@ -117,16 +117,6 @@ body {
   background-color: #2f3237;
 }
 
-.actions {
-  padding: 8px 12px 8px;
-  margin: 0px 0px 8px 0px;
-}
-.buttons-container {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 8px;
-}
-
 button {
   background-color: #f8ecdb;
   width: 90px;

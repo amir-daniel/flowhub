@@ -7,6 +7,9 @@ let savedTime = null;
 let timerName = "timer";
 let etaMode = false;
 let userName = "River";
+const ELAPSED_MODE = 0;
+const ETA_MODE = 1;
+let mode = 0; // for now it's local, and not accessable from the popup
 
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
@@ -42,12 +45,34 @@ const scheduleAlarm = () => {
 
 const onTick = () => {
   chrome.storage.sync.get(
-    ["startedRecordingAt", "savedTime", "totalSeconds"],
+    [
+      "startedRecordingAt",
+      "savedTime",
+      "totalSeconds",
+      "start",
+      "progress",
+      "end",
+      "mode",
+    ],
     (data) => {
       if (data.startedRecordingAt !== null || data.savedTime === null) {
-        chrome.action.setBadgeText({
-          text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
-        });
+        // started recording
+        if (data.mode === ELAPSED_MODE) {
+          chrome.action.setBadgeText({
+            text: beautifyForBadge(
+              (Date.now() - data.startedRecordingAt) / 1000
+            ),
+          });
+        } else {
+          chrome.action.setBadgeText({
+            text: getETA(
+              data.progress,
+              data.start,
+              data.end,
+              (Date.now() - data.startedRecordingAt) / 1000
+            ),
+          });
+        }
 
         // chrome.storage.sync.set({ totalSeconds: data.totalSeconds + 1 });
         scheduleAlarm();
@@ -56,14 +81,11 @@ const onTick = () => {
   );
 };
 
-const updateTimerState = (startedRecordingAt, savedTime) => {
+const updateTimerState = () => {
   chrome.storage.sync.get(
-    ["startedRecordingAt", "savedTime", "start", "progress", "end"],
+    ["startedRecordingAt", "savedTime", "start", "progress", "end", "mode"],
     (data) => {
-      startedRecordingAt = data.startedRecordingAt;
-      savedTime = data.savedTime;
-
-      if (startedRecordingAt === null) {
+      if (data.startedRecordingAt === null) {
         // not recording
         if (data.end === data.progress && data.progress !== data.start) {
           chrome.action.setBadgeBackgroundColor({ color: "#50C878" }); // green color
@@ -71,15 +93,29 @@ const updateTimerState = (startedRecordingAt, savedTime) => {
           chrome.action.setBadgeBackgroundColor({ color: "#777" }); // grey color
         }
 
-        if (savedTime !== null) {
-          chrome.action.setBadgeText({
-            text: beautifyForBadge(savedTime),
-          });
+        if (data.savedTime !== null) {
+          // not recording but some time is saved
+          if (data.mode === ELAPSED_MODE) {
+            chrome.action.setBadgeText({
+              text: beautifyForBadge(data.savedTime),
+            });
+          } else {
+            chrome.action.setBadgeText({
+              // show infinity as ETA in that case
+              text: unknownETAChar,
+            });
+          }
         } else {
+          // not recording but no time is saved
           chrome.action.setBadgeText({ text: "?" });
         }
       } else {
-        chrome.action.setBadgeBackgroundColor({ color: "#800000" }); // red color
+        console.log(data.mode);
+        if (data.mode === 0) {
+          chrome.action.setBadgeBackgroundColor({ color: "#800000" }); // red color
+        } else {
+          chrome.action.setBadgeBackgroundColor({ color: "#6a0dad" }); // purple color (could also try b30086)
+        }
         scheduleAlarm();
       }
     }
@@ -128,61 +164,71 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ savedTime });
   chrome.storage.sync.set({ userName });
   chrome.storage.sync.set({ totalSeconds });
+  chrome.storage.sync.set({ mode });
 });
 
 chrome.commands.onCommand.addListener((command) => {
-  chrome.storage.sync.get(
-    ["start", "progress", "end", "startedRecordingAt", "savedTime"],
-    (data) => {
-      if (data.progress < data.end && data.startedRecordingAt !== null) {
-        chrome.storage.sync.set({ progress: data.progress + 1 });
-        // don't forget to update in Timer.js the checker
-        chrome.notifications.create({
-          type: "progress",
-          iconUrl: "/images/get_started128.png",
-          title: "River",
-          message: `Hi there, just wanted to let you know that your progress ${
-            data.progress + 1 === data.end // it's progress + 1,
-              ? // noticed that we incremented it a few lines ago
-                "was staggering, and you are done! ✅"
-              : `is staggering, and you are destined to be done at ${getETA(
-                  data.progress + 1,
-                  data.start,
-                  data.end,
-                  (Date.now() - data.startedRecordingAt) / 1000
-                )}.`
-          } `,
-          progress:
-            data.end === 0
-              ? 0
-              : Math.floor(
-                  ((data.progress + 1 - data.start) / (data.end - data.start)) *
-                    100
-                ),
-        });
-        if (data.progress + 1 === data.end) {
-          chrome.alarms.clearAll();
-          chrome.storage.sync.set(
-            {
-              startedRecordingAt: null,
-              savedTime: (Date.now() - data.startedRecordingAt) / 1000,
-            },
-            () => {
-              updateTimerState();
-            }
-          );
+  if (command === "change-view") {
+    chrome.storage.sync.get(["mode"], (data) => {
+      chrome.storage.sync.set({
+        mode: data.mode === ELAPSED_MODE ? ETA_MODE : ELAPSED_MODE,
+      });
+    });
+  } else if (command === "progress-up") {
+    chrome.storage.sync.get(
+      ["start", "progress", "end", "startedRecordingAt", "savedTime"],
+      (data) => {
+        if (data.progress < data.end && data.startedRecordingAt !== null) {
+          chrome.storage.sync.set({ progress: data.progress + 1 });
+          // don't forget to update in Timer.js the checker
+          chrome.notifications.create({
+            type: "progress",
+            iconUrl: "/images/get_started128.png",
+            title: "River",
+            message: `Hi there, just wanted to let you know that your progress ${
+              data.progress + 1 === data.end // it's progress + 1,
+                ? // noticed that we incremented it a few lines ago
+                  "was staggering, and you are done! ✅"
+                : `is staggering, and you are destined to be done at ${getETA(
+                    data.progress + 1,
+                    data.start,
+                    data.end,
+                    (Date.now() - data.startedRecordingAt) / 1000
+                  )}.`
+            } `,
+            progress:
+              data.end === 0
+                ? 0
+                : Math.floor(
+                    ((data.progress + 1 - data.start) /
+                      (data.end - data.start)) *
+                      100
+                  ),
+          });
+          if (data.progress + 1 === data.end) {
+            chrome.alarms.clearAll();
+            chrome.storage.sync.set(
+              {
+                startedRecordingAt: null,
+                savedTime: (Date.now() - data.startedRecordingAt) / 1000,
+              },
+              () => {
+                updateTimerState();
+              }
+            );
+          }
+        } else {
+          chrome.notifications.create({
+            type: "progress",
+            iconUrl: "/images/get_started128.png",
+            title: "River",
+            message: "Something went wrong!",
+            progress: 0,
+          });
         }
-      } else {
-        chrome.notifications.create({
-          type: "progress",
-          iconUrl: "/images/get_started128.png",
-          title: "River",
-          message: "Something went wrong!",
-          progress: 0,
-        });
       }
-    }
-  );
+    );
+  }
 });
 
 chrome.alarms.onAlarm.addListener(onTick);
@@ -197,7 +243,11 @@ chrome.storage.onChanged.addListener((changes) => {
     }
   }
 
-  if ("savedTime" in changes || "startedRecordingAt" in changes) {
+  if (
+    "savedTime" in changes ||
+    "startedRecordingAt" in changes ||
+    "mode" in changes
+  ) {
     updateTimerState(); // update label
   }
 });

@@ -109,6 +109,10 @@ body {
   cursor: pointer;
 }
 
+.button-seperated {
+  border-bottom: 1px solid #2f3237;
+}
+
 .datasection {
   transition: background-color 0.4s;
 }
@@ -117,14 +121,23 @@ body {
   background-color: #2f3237;
 }
 
+.progress-section {
+  background-color: #1d1e20;
+}
+
 .actions {
+  padding: 10px 12px 10px;
+  /* margin: 0px 0px 8px 0px; */
+}
+.prog-actions {
   padding: 8px 12px 8px;
-  margin: 0px 0px 8px 0px;
+  margin: 0px 0px 0px 0px;
 }
 .buttons-container {
   display: flex;
   justify-content: space-between;
-  padding-top: 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 button {

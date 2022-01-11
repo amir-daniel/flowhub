@@ -277,35 +277,42 @@ function App() {
       "Enter amount of time to load in the following format: h:mm:ss"
     );
 
-    let timeArr = x?.split(":").reverse();
+    if (x !== undefined && x !== null) {
+      let timeArr = x?.split(":").reverse();
 
-    if (timeArr?.length !== 3) {
-      alert("Invalid input! Too many or too few fields were input.");
-      return;
+      if (timeArr?.length !== 3) {
+        alert("Invalid input! Too many or too few fields were input.");
+        return;
+      }
+
+      if (
+        !Number.isInteger(+timeArr[0]) ||
+        !Number.isInteger(+timeArr[1]) ||
+        !Number.isInteger(+timeArr[2])
+      ) {
+        alert("Invalid input! All fields must be integers.");
+        return;
+      }
+
+      //All checks passed, now we're diving in to the addition.
+      let desiredTimeInSeconds =
+        +timeArr[0] + +timeArr[1] * 60 + +timeArr[2] * 3600;
+
+      dataDispatch({ type: "USER_ADDTIME", value: desiredTimeInSeconds });
     }
-
-    if (
-      !Number.isInteger(+timeArr[0]) ||
-      !Number.isInteger(+timeArr[1]) ||
-      !Number.isInteger(+timeArr[2])
-    ) {
-      alert("Invalid input! All fields must be integers.");
-      return;
-    }
-
-    //All checks passed, now we're diving in to the addition.
-    let desiredTimeInSeconds =
-      +timeArr[0] + +timeArr[1] * 60 + +timeArr[2] * 3600;
-
-    dataDispatch({ type: "USER_ADDTIME", value: desiredTimeInSeconds });
   };
 
   const nameChangeHandler = () => {
     let newUserName = prompt("Please choose your nickname:")?.trim();
-    setUserName(newUserName?.length === 0 ? getUserName : newUserName);
-    chrome.storage.sync.set({
-      userName: newUserName?.length === 0 ? getUserName : newUserName,
-    });
+
+    if (newUserName?.length === 0) {
+      alert("Invalid input! Name must contain at least one charachter.");
+    } else if (newUserName !== undefined && newUserName !== null) {
+      setUserName(newUserName);
+      chrome.storage.sync.set({
+        userName: newUserName,
+      });
+    }
   };
 
   const tickHandler = () => {
@@ -391,7 +398,12 @@ function App() {
             />
           </div>
         </div>
-        <div className="actions datasection">
+        <div
+          className={
+            "actions datasection" +
+            (dataState.end > dataState.start ? " button-seperated" : "")
+          }
+        >
           {/* <div>Actions</div> */}
           <div className="buttons-container">
             <button
@@ -425,7 +437,20 @@ function App() {
             />
           </div>
         </div>
-        <AnimatedProgressBar />
+        {dataState.end > dataState.start ? (
+          <div className="progress-section prog-actions">
+            <AnimatedProgressBar
+              progress={
+                dataState.end - dataState.start === 0
+                  ? 0
+                  : (dataState.current - dataState.start) /
+                    (dataState.end - dataState.start)
+              }
+            />
+          </div>
+        ) : (
+          false
+        )}
       </div>
     </div>
   );

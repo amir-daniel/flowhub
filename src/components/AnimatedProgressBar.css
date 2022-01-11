@@ -1,0 +1,51 @@
+.Loading {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 10px;
+  background-color: #f1f1f1;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  animation: width 2s ease;
+}
+
+.loadingAfter {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 0;
+  height: 100%;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  width: 30%;
+  background: #e5405e;
+  transition: width 2s ease, background-color 2s ease;
+}
+
+@keyframes load {
+  0% {
+    width: 0;
+    background: #e5405e;
+  }
+
+  25% {
+    width: 40%;
+    background: #e5405e;
+  }
+
+  50% {
+    width: 60%;
+    background: #ffdb3a;
+  }
+
+  75% {
+    width: 75%;
+    background: #e9f08c;
+  }
+
+  100% {
+    width: 100%;
+    background: #3fffa2;
+  }
+}
