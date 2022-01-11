@@ -6,6 +6,11 @@ import BufferElement from "./components/BufferElement";
 import AnimatedProgressBar from "./components/AnimatedProgressBar";
 import { useState, useEffect, useReducer, useRef } from "react";
 
+const playFile = (filepath) => {
+  var audioPlayer = new Audio(chrome.runtime.getURL(filepath));
+  audioPlayer.play();
+};
+
 function App() {
   // ETA Mode (Forward Looking),
   // Sequential Mode (Time Elapsed)
@@ -248,6 +253,19 @@ function App() {
     let delayedUpdate;
     if (!isInInitialization.current) {
       // don't write back values on first initializating
+
+      if (
+        dataState.end === dataState.current &&
+        dataState.end !== dataState.start
+      ) {
+        playFile("sounds/complete.mp3");
+      } else if (
+        dataState.start !== dataState.current &&
+        dataState.end !== dataState.start
+      ) {
+        playFile("sounds/increment.mp3");
+      }
+
       delayedUpdate = setTimeout(() => {
         chrome.storage.sync.set(
           {
