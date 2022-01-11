@@ -49,7 +49,7 @@ const onTick = () => {
           text: beautifyForBadge((Date.now() - data.startedRecordingAt) / 1000),
         });
 
-        chrome.storage.sync.set({ totalSeconds: data.totalSeconds + 1 });
+        // chrome.storage.sync.set({ totalSeconds: data.totalSeconds + 1 });
         scheduleAlarm();
       }
     }

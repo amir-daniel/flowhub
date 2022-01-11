@@ -12,6 +12,9 @@ function App() {
 
   const [isBuffering, setIsBuffering] = useState(false);
   const isInInitialization = useRef(true); // to signal to the buffer not to load while first initializing
+  const isBufferingRef = useRef(false);
+
+  isBufferingRef.current = isBuffering;
 
   const filterInput = (newInput, oldInput) => {
     if ((newInput + "")?.trim() === "") {
@@ -30,6 +33,13 @@ function App() {
         time: action.time,
         total: action.total,
         timerID: state.timerID,
+      };
+    } else if (action.type === "DATA_REFRESH") {
+      return {
+        start: action.start,
+        current: action.progress,
+        end: action.end,
+        total: action.totalSeconds,
       };
     } else if (action.type === "USER_ADDTIME") {
       chrome.storage.sync.set({
@@ -75,40 +85,40 @@ function App() {
         timerID: state.timerID,
       };
     } else if (action.type === "TOTAL_UPDATE") {
-      return {
-        start: state.start,
-        current: state.current,
-        end: state.end,
-        time: state.time,
-        total: action.value,
-        timerID: state.timerID,
-      };
+      // <----------- deprecated completely
+      throw new Error();
     } else if (action.type === "TIME_RESET") {
+      let accumulatedTime = state.total + state.time;
+
       clearInterval(state.timerID);
       chrome.storage.sync.set({
         startedRecordingAt: null,
         savedTime: null,
+        totalSeconds: accumulatedTime,
       });
       return {
         start: state.start,
         current: state.current,
         end: state.end,
         time: null,
-        total: state.total,
+        total: accumulatedTime,
         timerID: false,
       };
     } else if (action.type === "FULL_RESET") {
+      let accumulatedTime = state.total + state.time;
+
       clearInterval(state.timerID);
       chrome.storage.sync.set({
         startedRecordingAt: null,
         savedTime: null,
+        totalSeconds: accumulatedTime,
       });
       return {
         start: 0,
         current: 0,
         end: 0,
         time: null,
-        total: state.total,
+        total: accumulatedTime,
         timerID: false,
       };
     } else if (action.type === "MODIFY_TIMERID") {
@@ -202,12 +212,16 @@ function App() {
     if (!isInInitialization.current) {
       // don't write back values on first initializating
       delayedUpdate = setTimeout(() => {
-        chrome.storage.sync.set({
-          start: dataState.start,
-          progress: dataState.current,
-          end: dataState.end,
-        });
-        setIsBuffering(false);
+        chrome.storage.sync.set(
+          {
+            start: dataState.start,
+            progress: dataState.current,
+            end: dataState.end,
+          },
+          () => {
+            setIsBuffering(false);
+          }
+        );
       }, 2000); // add buffering
       setIsBuffering(true);
       return () => {
@@ -258,16 +272,20 @@ function App() {
   };
 
   const tickHandler = () => {
-    chrome.storage.sync.get(
-      ["start", "progress", "end", "totalSeconds"],
-
-      (data) => {
-        dataDispatch({ type: "START_CHANGE", value: data.start });
-        dataDispatch({ type: "CURRENT_CHANGE", value: data.progress });
-        dataDispatch({ type: "END_CHANGE", value: data.end });
-        dataDispatch({ type: "TOTAL_UPDATE", value: data.totalSeconds });
-      }
-    );
+    if (isBufferingRef.current === false) {
+      chrome.storage.sync.get(
+        ["start", "progress", "end", "totalSeconds"],
+        (data) => {
+          dataDispatch({
+            type: "DATA_REFRESH",
+            start: data.start,
+            progress: data.progress,
+            end: data.end,
+            totalSeconds: data.totalSeconds,
+          });
+        }
+      );
+    }
   };
 
   return (
@@ -347,6 +365,7 @@ function App() {
               isInitializing={isInInitialization}
             />
             <Timer
+              autoFocus={true}
               timerID={dataState.timerID}
               modifyTimerID={(value) => {
                 dataDispatch({ type: "MODIFY_TIMERID", value: value });
