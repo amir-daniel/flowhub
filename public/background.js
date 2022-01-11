@@ -110,7 +110,6 @@ const updateTimerState = () => {
           chrome.action.setBadgeText({ text: "?" });
         }
       } else {
-        console.log(data.mode);
         if (data.mode === 0) {
           chrome.action.setBadgeBackgroundColor({ color: "#800000" }); // red color
         } else {
