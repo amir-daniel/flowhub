@@ -1,5 +1,6 @@
 /*global chrome*/
 import { useEffect } from "react";
+
 const Timer = (props) => {
   const tickHandler = () => {
     props.onTick();
@@ -12,43 +13,7 @@ const Timer = (props) => {
           tickHandler();
         }, 1000)
       );
-      chrome.storage.sync.get(["startedRecordingAt", "savedTime"], (data) => {
-        if (data.startedRecordingAt === null && data.savedTime === null) {
-          chrome.storage.sync.set({
-            startedRecordingAt: Date.now(),
-          });
-        } else {
-          chrome.storage.sync.get(["startedRecordingAt"], (data) => {});
-
-          chrome.storage.sync.set({
-            startedRecordingAt: Date.now() - props.value.current * 1000,
-            savedTime: null,
-          });
-        }
-      });
     }
-  };
-
-  const stopHandler = () => {
-    clearInterval(props.timerID.current);
-    props.modifyTimerID(false);
-
-    chrome.storage.sync.set({
-      startedRecordingAt: null,
-      savedTime: props.value.current,
-    });
-  };
-
-  const resetHandler = () => {
-    // stopHandler(); // pause time recording
-    clearInterval(props.timerID.current);
-    props.modifyTimerID(false);
-    props.onReset(); // remove time recorded -> reset === true
-
-    chrome.storage.sync.set({
-      startedRecordingAt: null,
-      savedTime: null,
-    });
   };
 
   useEffect(() => {
@@ -60,21 +25,17 @@ const Timer = (props) => {
   }, []);
 
   return (
-    <span>
-      <button disabled={!props.isResettable} onClick={resetHandler}>
-        ⏹️
-      </button>
-      <button disabled={!props.timerID.current} onClick={stopHandler}>
-        ⏸️
-      </button>
-      <button
-        disabled={props.timerID.current !== false || !props.isRecordable}
-        // seems somewhat redundant
-        onClick={startHandler}
-      >
-        ▶️
-      </button>
-    </span>
+    <button
+      onClick={() => {
+        if (props.timerID.current === false) {
+          startHandler();
+        } else {
+          props.onPause();
+        }
+      }}
+    >
+      {props.timerID.current === false ? "Record" : "Pause"}
+    </button>
   );
 };
 
