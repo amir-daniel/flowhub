@@ -259,6 +259,12 @@ function App() {
         dataState.end !== dataState.start
       ) {
         playFile("sounds/complete.mp3");
+        chrome.storage.sync.get(["startedRecordingAt"], (data) => {
+          dataDispatch({
+            type: "TIME_PAUSE",
+            value: data.startedRecordingAt,
+          });
+        });
       } else if (
         dataState.start !== dataState.current &&
         dataState.end !== dataState.start
