@@ -240,7 +240,7 @@ function App() {
       "Enter amount of time to load in the following format: h:mm:ss"
     );
 
-    let timeArr = x.split(":").reverse();
+    let timeArr = x?.split(":").reverse();
 
     if (timeArr?.length !== 3) {
       alert("Invalid input! Too many or too few fields were input.");
