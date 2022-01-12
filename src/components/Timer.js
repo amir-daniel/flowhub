@@ -30,8 +30,7 @@ const Timer = (props) => {
   return (
     <button
       ref={props.submitRef}
-      // autoFocus={props.autoFocus}
-      autoFocus="true"
+      autoFocus={props.autoFocus}
       onClick={() => {
         if (props.timerID === false) {
           startHandler();
