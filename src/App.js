@@ -360,148 +360,143 @@ function App() {
 
   return (
     <div id="popup-container" className="Card">
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-        }}
-      >
-        <div className="Card-header">
-          <a onClick={nameChangeHandler} className="headline">
-            <b>{getUserName}</b>
-          </a>
-          <a onClick={timeAddHandler} className="mode">
-            Import Time
-          </a>
+      <div className="Card-header">
+        <a onClick={nameChangeHandler} className="headline">
+          <b>{getUserName}</b>
+        </a>
+        <a onClick={timeAddHandler} className="mode">
+          Import Time
+        </a>
+      </div>
+
+      <div className="Card-layout">
+        <div className="stats seperated datasection">
+          <div>
+            <b>Stats</b>
+          </div>
+          <div>
+            You have in total <b>{Math.round(dataState.total / 3600)}</b>{" "}
+            recorded hours.
+          </div>
         </div>
 
-        <div className="Card-layout">
-          <div className="stats seperated datasection">
-            <div>
-              <b>Stats</b>
-            </div>
-            <div>
-              You have in total <b>{Math.round(dataState.total / 3600)}</b>{" "}
-              recorded hours.
-            </div>
+        <div className="initialize-data seperated datasection">
+          <div className="data-row">
+            <div>Start</div>
+            <NumberInput
+              min={0}
+              className="data-input"
+              placeholder="0"
+              onChange={(event) => {
+                dataDispatch({
+                  type: "START_CHANGE",
+                  value: event.target.value,
+                });
+              }}
+              value={+dataState.start === 0 ? "" : dataState.start}
+            />
           </div>
-          <div className="initialize-data seperated datasection">
-            <div className="data-row">
-              <div>Start</div>
-              <NumberInput
-                min={0}
-                className="data-input"
-                placeholder="0"
-                onChange={(event) => {
-                  dataDispatch({
-                    type: "START_CHANGE",
-                    value: event.target.value,
-                  });
-                }}
-                value={+dataState.start === 0 ? "" : dataState.start}
-              />
-            </div>
-            <div className="data-row">
-              <div>Progress</div>
-              <NumberInput
-                className="data-input"
-                placeholder="0"
-                onChange={(event) => {
-                  dataDispatch({
-                    type: "CURRENT_CHANGE",
-                    value: event.target.value,
-                  });
-                }}
-                value={+dataState.current === 0 ? "" : dataState.current}
-              />
-            </div>
-            <div className="data-row">
-              <div>Finish</div>
-              <NumberInput
-                className="data-input"
-                placeholder="0"
-                onChange={(event) => {
-                  dataDispatch({
-                    type: "END_CHANGE",
-                    value: event.target.value,
-                  });
-                }}
-                value={+dataState.end === 0 ? "" : dataState.end}
-              />
-            </div>
+          <div className="data-row">
+            <div>Progress</div>
+            <NumberInput
+              className="data-input"
+              placeholder="0"
+              onChange={(event) => {
+                dataDispatch({
+                  type: "CURRENT_CHANGE",
+                  value: event.target.value,
+                });
+              }}
+              value={+dataState.current === 0 ? "" : dataState.current}
+            />
           </div>
-          <div
-            className={
-              "actions datasection" +
-              (dataState.end > dataState.start ? " button-seperated" : "")
-            }
-          >
-            {/* <div>Actions</div> */}
-            <div className="buttons-container">
-              <button
-                onClick={
-                  dataState.timerID === false
-                    ? () => dataDispatch({ type: "TIME_RESET" })
-                    : () =>
-                        chrome.storage.sync.get(
-                          ["startedRecordingAt"],
-                          (data) => {
-                            dataDispatch({
-                              type: "TIME_PAUSE",
-                              value: data.startedRecordingAt,
-                            });
-                          }
-                        )
-                }
-                onDoubleClick={() => dataDispatch({ type: "FULL_RESET" })}
-              >
-                {dataState.timerID === false ? "Reset" : "Pause"}
-              </button>
-              <BufferElement
-                isActive={isBuffering}
-                isInitializing={isInInitialization}
-                timeDisplay={
-                  timeToShow !== false ? beautify(timeToShow) : timeToShow
-                }
-              />
-              <Timer
-                autoFocus={true}
-                timerID={dataState.timerID}
-                onAscend={() => {
-                  if (dataState.current < dataState.end) {
-                    playFile("sounds/increment.mp3");
-
-                    incrementCurrent(dataState.current + 1);
-                  } else {
-                    alert("Something went wrong!");
-                  }
-                }}
-                enabled={
-                  dataState.timerID === false ||
-                  dataState.end > dataState.current
-                }
-                modifyTimerID={(newID) => {
-                  dataDispatch({ type: "MODIFY_TIMERID", value: newID });
-                }}
-                onTick={tickHandler}
-              />
-            </div>
+          <div className="data-row">
+            <div>Finish</div>
+            <NumberInput
+              className="data-input"
+              placeholder="0"
+              onChange={(event) => {
+                dataDispatch({
+                  type: "END_CHANGE",
+                  value: event.target.value,
+                });
+              }}
+              value={+dataState.end === 0 ? "" : dataState.end}
+            />
           </div>
-          {dataState.end > dataState.start ? (
-            <div className="progress-section prog-actions">
-              <AnimatedProgressBar
-                progress={
-                  dataState.end - dataState.start === 0
-                    ? 0
-                    : (dataState.current - dataState.start) /
-                      (dataState.end - dataState.start)
-                }
-              />
-            </div>
-          ) : (
-            false
-          )}
         </div>
-      </form>
+        <div
+          className={
+            "actions datasection" +
+            (dataState.end > dataState.start ? " button-seperated" : "")
+          }
+        >
+          {/* <div>Actions</div> */}
+          <div className="buttons-container">
+            <button
+              onClick={
+                dataState.timerID === false
+                  ? () => dataDispatch({ type: "TIME_RESET" })
+                  : () =>
+                      chrome.storage.sync.get(
+                        ["startedRecordingAt"],
+                        (data) => {
+                          dataDispatch({
+                            type: "TIME_PAUSE",
+                            value: data.startedRecordingAt,
+                          });
+                        }
+                      )
+              }
+              onDoubleClick={() => dataDispatch({ type: "FULL_RESET" })}
+            >
+              {dataState.timerID === false ? "Reset" : "Pause"}
+            </button>
+            <BufferElement
+              isActive={isBuffering}
+              isInitializing={isInInitialization}
+              timeDisplay={
+                timeToShow !== false ? beautify(timeToShow) : timeToShow
+              }
+            />
+            <Timer
+              autoFocus={true}
+              timerID={dataState.timerID}
+              onAscend={() => {
+                if (dataState.current < dataState.end) {
+                  playFile("sounds/increment.mp3");
+
+                  incrementCurrent(dataState.current + 1);
+                } else {
+                  alert("Something went wrong!");
+                }
+              }}
+              enabled={
+                dataState.timerID === false || dataState.end > dataState.current
+              }
+              modifyTimerID={(newID) => {
+                dataDispatch({ type: "MODIFY_TIMERID", value: newID });
+              }}
+              onTick={tickHandler}
+            />
+          </div>
+        </div>
+
+        {dataState.end > dataState.start ? (
+          <div className="progress-section prog-actions">
+            <AnimatedProgressBar
+              progress={
+                dataState.end - dataState.start === 0
+                  ? 0
+                  : (dataState.current - dataState.start) /
+                    (dataState.end - dataState.start)
+              }
+            />
+          </div>
+        ) : (
+          false
+        )}
+      </div>
     </div>
   );
 }

@@ -6,7 +6,9 @@ const Timer = (props) => {
 
   const tickHandler = () => {
     props.onTick();
-    inputRef?.current.focus();
+    // if (props.autoFocus !== false) {   <-------- now deprecated
+    //   inputRef?.current.focus();
+    // }
   };
 
   const startHandler = () => {
@@ -29,7 +31,6 @@ const Timer = (props) => {
 
   return (
     <button
-      type="submit"
       ref={inputRef}
       autoFocus={props.autoFocus}
       onClick={() => {
