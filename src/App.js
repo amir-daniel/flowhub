@@ -19,6 +19,8 @@ function App() {
   const isInInitialization = useRef(true); // to signal to the buffer not to load while first initializing
   const isBufferingRef = useRef(false);
 
+  let inputRef = useRef(null);
+
   isBufferingRef.current = isBuffering;
 
   const designDigit = (num) => (+num < 10 ? "0" + num : num);
@@ -386,6 +388,11 @@ function App() {
             <NumberInput
               min={0}
               className="data-input"
+              onSubmit={(event) => {
+                if (event.key === "Enter") {
+                  inputRef.current.focus();
+                }
+              }}
               placeholder="0"
               onChange={(event) => {
                 dataDispatch({
@@ -401,6 +408,11 @@ function App() {
             <NumberInput
               className="data-input"
               placeholder="0"
+              onSubmit={(event) => {
+                if (event.key === "Enter") {
+                  inputRef.current.focus();
+                }
+              }}
               onChange={(event) => {
                 dataDispatch({
                   type: "CURRENT_CHANGE",
@@ -415,6 +427,11 @@ function App() {
             <NumberInput
               className="data-input"
               placeholder="0"
+              onSubmit={(event) => {
+                if (event.key === "Enter") {
+                  inputRef.current.focus();
+                }
+              }}
               onChange={(event) => {
                 dataDispatch({
                   type: "END_CHANGE",
@@ -463,6 +480,7 @@ function App() {
               }
             />
             <Timer
+              submitRef={inputRef}
               autoFocus={true}
               timerID={dataState.timerID}
               onAscend={() => {

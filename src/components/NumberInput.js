@@ -2,10 +2,13 @@
 import "./NumberInput.css";
 
 const NumberInput = (props) => {
+  let btnRef = props.submitBtnRef;
+
   return (
     <div>
       <input
         min={0}
+        onKeyDown={props.onSubmit}
         type="number"
         className={props.className}
         placeholder={props.placeholder}
