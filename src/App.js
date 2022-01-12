@@ -456,7 +456,6 @@ function App() {
               }
             />
             <Timer
-              autoFocus={true}
               timerID={dataState.timerID}
               onAscend={() => {
                 if (dataState.current < dataState.end) {
