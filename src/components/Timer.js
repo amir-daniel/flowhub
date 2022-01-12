@@ -30,7 +30,8 @@ const Timer = (props) => {
   return (
     <button
       ref={props.submitRef}
-      autoFocus={props.autoFocus}
+      // autoFocus={props.autoFocus}
+      autoFocus="true"
       onClick={() => {
         if (props.timerID === false) {
           startHandler();
@@ -41,7 +42,7 @@ const Timer = (props) => {
       }}
       disabled={!props.enabled}
     >
-      {props.timerID === false ? "Record" : "Ascend!"}
+      {props.timerID === false ? "Record" : "Harvest"}
     </button>
   );
 };
