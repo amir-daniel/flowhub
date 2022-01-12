@@ -1,9 +1,12 @@
 /*global chrome*/
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const Timer = (props) => {
+  let inputRef = useRef(null);
+
   const tickHandler = () => {
     props.onTick();
+    inputRef?.current.focus();
   };
 
   const startHandler = () => {
@@ -26,6 +29,8 @@ const Timer = (props) => {
 
   return (
     <button
+      type="submit"
+      ref={inputRef}
       autoFocus={props.autoFocus}
       onClick={() => {
         if (props.timerID === false) {
