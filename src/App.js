@@ -188,6 +188,10 @@ function App() {
     }
   };
 
+  const incrementCurrent = (val) => {
+    dataDispatch({ type: "CURRENT_CHANGE", value: val });
+  };
+
   let [dataState, dataDispatch] = useReducer(dataReducer, {
     start: null,
     current: null,
@@ -273,12 +277,8 @@ function App() {
                   value: data.startedRecordingAt,
                 });
               });
-            } else if (
-              dataState.start !== dataState.current &&
-              dataState.end !== dataState.start
-            ) {
-              playFile("sounds/increment.mp3");
             }
+
             setIsBuffering(false);
           }
         );
@@ -430,10 +430,23 @@ function App() {
           {/* <div>Actions</div> */}
           <div className="buttons-container">
             <button
-              onClick={() => dataDispatch({ type: "TIME_RESET" })}
+              onClick={
+                dataState.timerID === false
+                  ? () => dataDispatch({ type: "TIME_RESET" })
+                  : () =>
+                      chrome.storage.sync.get(
+                        ["startedRecordingAt"],
+                        (data) => {
+                          dataDispatch({
+                            type: "TIME_PAUSE",
+                            value: data.startedRecordingAt,
+                          });
+                        }
+                      )
+              }
               onDoubleClick={() => dataDispatch({ type: "FULL_RESET" })}
             >
-              Reset
+              {dataState.timerID === false ? "Reset" : "Pause"}
             </button>
             <BufferElement
               isActive={isBuffering}
@@ -445,18 +458,22 @@ function App() {
             <Timer
               autoFocus={true}
               timerID={dataState.timerID}
+              onAscend={() => {
+                if (dataState.current < dataState.end) {
+                  playFile("sounds/increment.mp3");
+
+                  incrementCurrent(dataState.current + 1);
+                } else {
+                  alert("Something went wrong!");
+                }
+              }}
+              enabled={
+                dataState.timerID === false || dataState.end > dataState.current
+              }
               modifyTimerID={(newID) => {
                 dataDispatch({ type: "MODIFY_TIMERID", value: newID });
               }}
               onTick={tickHandler}
-              onPause={() =>
-                chrome.storage.sync.get(["startedRecordingAt"], (data) => {
-                  dataDispatch({
-                    type: "TIME_PAUSE",
-                    value: data.startedRecordingAt,
-                  });
-                })
-              }
             />
           </div>
         </div>

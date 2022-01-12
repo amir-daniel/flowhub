@@ -31,11 +31,13 @@ const Timer = (props) => {
         if (props.timerID === false) {
           startHandler();
         } else {
-          props.onPause();
+          // ascend action
+          props.onAscend();
         }
       }}
+      disabled={!props.enabled}
     >
-      {props.timerID === false ? "Record" : "Pause"}
+      {props.timerID === false ? "Record" : "Ascend!"}
     </button>
   );
 };
