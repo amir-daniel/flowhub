@@ -175,7 +175,7 @@ chrome.commands.onCommand.addListener((command) => {
     });
   } else if (command === "progress-up") {
     chrome.storage.sync.get(
-      ["start", "progress", "end", "startedRecordingAt", "savedTime"],
+      ["start", "progress", "end", "startedRecordingAt", "savedTime", "mode"],
       (data) => {
         if (data.progress < data.end && data.startedRecordingAt !== null) {
           chrome.storage.sync.set({ progress: data.progress + 1 });
@@ -188,10 +188,14 @@ chrome.commands.onCommand.addListener((command) => {
               data.progress + 1 === data.end // it's progress + 1,
                 ? // noticed that we incremented it a few lines ago
                   "was staggering, and you are done! ✅"
-                : `is staggering, and you are destined to be done at ${getETA(
+                : data.mode === 0
+                ? `is staggering, and you are destined to be done at ${getETA(
                     data.progress + 1,
                     data.start,
                     data.end,
+                    (Date.now() - data.startedRecordingAt) / 1000
+                  )}.`
+                : `is staggering, and you have already amassed a time of ${beautifyForBadge(
                     (Date.now() - data.startedRecordingAt) / 1000
                   )}.`
             } `,
