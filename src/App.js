@@ -456,7 +456,10 @@ function App() {
               isActive={isBuffering}
               isInitializing={isInInitialization}
               timeDisplay={
-                timeToShow !== false ? beautify(timeToShow) : timeToShow
+                timeToShow !== false
+                  ? beautify(timeToShow) +
+                    (dataState.timerID !== false ? " 🔴" : "")
+                  : timeToShow
               }
             />
             <Timer
