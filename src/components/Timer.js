@@ -1,16 +1,19 @@
 /*global chrome*/
 import { useEffect } from "react";
+import { StartRecordingOut } from "./Integration";
 
 const Timer = (props) => {
-  const checkMonday = () => {
+  const checkMonday = async () => {
     let isQuestRunning;
     let itemName;
     const shouldICheckMonday = true; // turn it off when saving version for daniel
 
     if (shouldICheckMonday === true) {
+      // arabic work ahead **WARNING**
       let query = `{
       items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress", limit: 1) {
         name
+        id
         column_values(ids: "time_tracking") {
           value
         }
@@ -31,11 +34,12 @@ const Timer = (props) => {
       })
         .then((res) => res.json())
         .catch((e) => {
+          console.log(e);
           chrome.notifications.create({
             type: "progress",
             iconUrl: "/images/get_started128.png",
             title: "River",
-            message: "Something went wrong connecting to Monday!...",
+            message: "Something went connecting to Monday!",
 
             progress: 0,
           });
@@ -45,36 +49,64 @@ const Timer = (props) => {
           return;
         })
         .then((res) => {
-          itemName = res?.["data"]?.["items_by_column_values"]?.[0]?.["name"];
-
-          chrome.storage.sync.set({
-            itemName: itemName,
-          });
-
-          props.onStartNewItem(itemName);
-
-          isQuestRunning =
-            JSON.parse(
-              res?.["data"]?.["items_by_column_values"]?.[0]?.[
-                "column_values"
-              ]?.[0]?.["value"],
-              null,
-              2
-            )["running"] == "true";
-
-          if (isQuestRunning === true) {
-            //something is running in monday
-            startHandler();
-            props.onBufferChange(false);
-          } else {
+          console.log(res);
+          if (res?.["data"]?.["items_by_column_values"] === undefined) {
             chrome.notifications.create({
               type: "progress",
               iconUrl: "/images/get_started128.png",
               title: "River",
-              message: "No currenly running quest was found on Monday!", // "Something went wrong!" message removed
+              message: "Connection rejected by Monday!", // "Something went wrong!" message removed
               progress: 0,
             });
             props.onBufferChange("force-hide");
+          } else if (res?.["data"]?.["items_by_column_values"]?.length === 0) {
+            chrome.notifications.create({
+              type: "progress",
+              iconUrl: "/images/get_started128.png",
+              title: "River",
+              message: "No eligible quest was found on Monday!", // "Something went wrong!" message removed
+              progress: 0,
+            });
+            props.onBufferChange("force-hide");
+          } else {
+            itemName = {
+              name: res?.["data"]?.["items_by_column_values"]?.[0]?.["name"],
+              id: res?.["data"]?.["items_by_column_values"]?.[0]?.["id"],
+            };
+
+            chrome.storage.sync.set({
+              itemName: itemName,
+            });
+
+            props.onStartNewItem(itemName);
+
+            isQuestRunning =
+              JSON.parse(
+                res?.["data"]?.["items_by_column_values"]?.[0]?.[
+                  "column_values"
+                ]?.[0]?.["value"],
+                null,
+                2
+              )["running"] == "true";
+
+            if (isQuestRunning === false) {
+              //found a quest and it is not running, as desired
+              startHandler();
+              StartRecordingOut(itemName.id).then((res) => {
+                console.log(res);
+                props.onBufferChange(res);
+              });
+            } else {
+              chrome.notifications.create({
+                type: "progress",
+                iconUrl: "/images/get_started128.png",
+                title: "River",
+                message:
+                  "Syncing error, found quests are already recording on Monday!", // "Something went wrong!" message removed
+                progress: 0,
+              });
+              props.onBufferChange("force-hide");
+            }
           }
         })
         .catch((e) => {
@@ -86,8 +118,7 @@ const Timer = (props) => {
 
             progress: 0,
           });
-          // startHandler();
-
+          //startHandler()
           props.onBufferChange("force-hide");
           return;
         });
@@ -129,7 +160,7 @@ const Timer = (props) => {
       autoFocus={props.autoFocus}
       onClick={() => {
         if (props.timerID === false) {
-          props.onBufferChange("force-show"); // undefined = force show buffer
+          props.onBufferChange("force-show"); // force show buffer
           checkMonday(); // set buffer first and then check monday
         } else {
           // ascend action

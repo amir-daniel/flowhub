@@ -13,6 +13,87 @@ const ETA_MODE = 1;
 let mode = 0; // for now it's local, and not accessable from the popup
 const unknownETAChar = "∞";
 
+const showErrorMsg = (msg) => {
+  chrome.notifications.create({
+    type: "progress",
+    iconUrl: "/images/get_started128.png",
+    title: "River",
+    message: msg,
+    progress: 0,
+  });
+};
+
+const stopRecordingAndWriteOut = async (
+  itemID,
+  start,
+  current,
+  end,
+  integrationEnabled
+) => {
+  if (integrationEnabled === true) {
+    let query5 = `mutation ($data: JSON!) {
+        change_multiple_column_values(board_id: 1774709998, item_id: ${itemID}, column_values: $data) {
+          id
+        }
+      }`;
+    let vars;
+    vars =
+      start === current
+        ? {
+            data: JSON.stringify({
+              status:
+                end === current && start !== end
+                  ? "Quest Complete"
+                  : "Quest in Progress",
+            }),
+          }
+        : {
+            data: JSON.stringify({
+              status:
+                end === current && start !== end
+                  ? "Quest Complete"
+                  : "Quest in Progress",
+              numbers: +current,
+            }),
+          };
+
+    fetch("https://api.monday.com/v2", {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjE0MDU3ODMyNSwidWlkIjoxMjcyNjA0NSwiaWFkIjoiMjAyMi0wMS0xMlQxOTo1MDo0NS4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6NTcwMTM4MCwicmduIjoidXNlMSJ9.fUP-1slk9PDDvoQtb1XgiSzMyOMbmCZbeDMnQZ_UyEU",
+      },
+      body: JSON.stringify({
+        query: query5,
+        variables: JSON.stringify(vars),
+      }),
+    })
+      .then((res) => res.json())
+      .catch((res) => {
+        showErrorMsg("Connection error while trying to sync items to Monday!");
+        return "force-hide";
+      })
+      .then((res) => {
+        let responseString = JSON.stringify(res, null, 2);
+        if (responseString.includes("error")) {
+          showErrorMsg(
+            "Item update was rejected by Monday! They said this: " +
+              responseString
+          );
+          return "force-hide";
+        } else {
+          showErrorMsg("Item sync was successful!");
+          return false;
+        }
+      })
+      .catch((res) => {
+        showErrorMsg("Processing error while trying to sync items to Monday!");
+        return "force-hide";
+      });
+  }
+};
+
 const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
 const destructureSeconds = (time) => {
@@ -245,6 +326,23 @@ chrome.storage.onChanged.addListener((changes) => {
     if (changes.startedRecordingAt.newValue === null) {
       // recording stopped, clear timer
       chrome.alarms.clear(timerName);
+
+      chrome.storage.sync.get(
+        ["startedRecordingAt", "start", "progress", "end", "itemName"],
+        (data) => {
+          if (data?.itemName?.id !== undefined) {
+            // notice that if value changes manually through popup while recording is not on, syncing will not take place
+            console.log(data.progress);
+            stopRecordingAndWriteOut(
+              data.itemName?.id,
+              data.start,
+              data.progress,
+              data.end,
+              true // ARABIC WORK cancel this when saving a version for daniel
+            );
+          }
+        }
+      );
     }
   }
 

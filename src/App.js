@@ -4,6 +4,7 @@ import NumberInput from "./components/NumberInput";
 import Timer from "./components/Timer";
 import BufferElement from "./components/BufferElement";
 import AnimatedProgressBar from "./components/AnimatedProgressBar";
+// import { stopRecordingAndWriteOut } from "./components/Integration";
 import { useState, useEffect, useReducer, useRef } from "react";
 
 const playFile = (filepath) => {
@@ -18,7 +19,7 @@ function App() {
   const [isBuffering, setIsBuffering] = useState(false);
   const isInInitialization = useRef(true); // to signal to the buffer not to load while first initializing
   const isBufferingRef = useRef(false);
-  const [itemName, setItemName] = useState(null);
+  const [itemObject, setItemObject] = useState(null);
 
   let inputRef = useRef(null);
 
@@ -237,7 +238,7 @@ function App() {
         "itemName",
       ],
       (data) => {
-        setItemName(data.itemName);
+        setItemObject(data.itemName);
         dataDispatch({
           type: "USER_INITIALIZE",
           time:
@@ -355,7 +356,7 @@ function App() {
           "itemName",
         ],
         (data) => {
-          setItemName(data.itemName);
+          setItemObject(data.itemName);
           dataDispatch({
             type: "DATA_REFRESH",
             start: data.start,
@@ -376,8 +377,10 @@ function App() {
       <div className="Card-header">
         <a onClick={nameChangeHandler} className="headline">
           <b>
-            {dataState.timerID !== false && itemName !== null ? (
-              <span style={{ color: "red" }}>{itemName}</span>
+            {dataState.timerID !== false &&
+            itemObject?.name !== null &&
+            itemObject?.name !== undefined ? (
+              <span style={{ color: "red" }}>{itemObject?.name}</span>
             ) : (
               "@" + getUserName
             )}
@@ -501,7 +504,7 @@ function App() {
               submitRef={inputRef}
               autoFocus={true}
               timerID={dataState.timerID}
-              onStartNewItem={setItemName}
+              onStartNewItem={setItemObject}
               onAscend={() => {
                 if (dataState.current < dataState.end) {
                   playFile("sounds/increment.mp3");
