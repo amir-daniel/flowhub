@@ -65,7 +65,7 @@ const BufferElement = (props) => {
   return message == false ? (
     <div style={{ paddingTop: "4px" }}>{props.timeDisplay}</div>
   ) : (
-    message
+    <div style={{ paddingTop: "4px" }}>{message}</div> // maybe remove these paddings later
   );
 };
 

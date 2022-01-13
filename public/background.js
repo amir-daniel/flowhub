@@ -7,6 +7,7 @@ let savedTime = null;
 let timerName = "timer";
 let etaMode = false;
 let userName = "River";
+let itemName = null;
 const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
 let mode = 0; // for now it's local, and not accessable from the popup
@@ -164,6 +165,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ userName });
   chrome.storage.sync.set({ totalSeconds });
   chrome.storage.sync.set({ mode });
+  chrome.storage.sync.set({ itemName });
 });
 
 chrome.commands.onCommand.addListener((command) => {

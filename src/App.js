@@ -18,6 +18,7 @@ function App() {
   const [isBuffering, setIsBuffering] = useState(false);
   const isInInitialization = useRef(true); // to signal to the buffer not to load while first initializing
   const isBufferingRef = useRef(false);
+  const [itemName, setItemName] = useState(null);
 
   let inputRef = useRef(null);
 
@@ -343,8 +344,16 @@ function App() {
   const tickHandler = () => {
     if (isBufferingRef.current === false) {
       chrome.storage.sync.get(
-        ["start", "progress", "end", "totalSeconds", "startedRecordingAt"],
+        [
+          "start",
+          "progress",
+          "end",
+          "totalSeconds",
+          "startedRecordingAt",
+          "itemName",
+        ],
         (data) => {
+          setItemName(data.itemName);
           dataDispatch({
             type: "DATA_REFRESH",
             start: data.start,
@@ -364,7 +373,13 @@ function App() {
     <div id="popup-container" className="Card">
       <div className="Card-header">
         <a onClick={nameChangeHandler} className="headline">
-          <b>{getUserName}</b>
+          <b>
+            {dataState.timerID !== false && itemName !== null ? (
+              <span style={{ color: "red" }}>{itemName}</span>
+            ) : (
+              "@" + getUserName
+            )}
+          </b>
         </a>
         <a onClick={timeAddHandler} className="mode">
           Import Time
@@ -480,9 +495,11 @@ function App() {
               }
             />
             <Timer
+              onBufferChange={setIsBuffering}
               submitRef={inputRef}
               autoFocus={true}
               timerID={dataState.timerID}
+              onStartNewItem={setItemName}
               onAscend={() => {
                 if (dataState.current < dataState.end) {
                   playFile("sounds/increment.mp3");

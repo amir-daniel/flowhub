@@ -2,6 +2,73 @@
 import { useEffect } from "react";
 
 const Timer = (props) => {
+  const checkMonday = () => {
+    let isQuestRunning;
+    let itemName;
+    const shouldICheckMonday = true; // turn it off when saving version for daniel
+
+    if (shouldICheckMonday === true) {
+      let query = `{
+      items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress", limit: 1) {
+        name
+        column_values(ids: "time_tracking") {
+          value
+        }
+      }
+    }
+    `;
+
+      fetch("https://api.monday.com/v2", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjE0MDU3ODMyNSwidWlkIjoxMjcyNjA0NSwiaWFkIjoiMjAyMi0wMS0xMlQxOTo1MDo0NS4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6NTcwMTM4MCwicmduIjoidXNlMSJ9.fUP-1slk9PDDvoQtb1XgiSzMyOMbmCZbeDMnQZ_UyEU",
+        },
+        body: JSON.stringify({
+          query: query,
+        }),
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          itemName = res?.["data"]?.["items_by_column_values"]?.[0]?.["name"];
+
+          chrome.storage.sync.set({
+            itemName: itemName,
+          });
+
+          props.onStartNewItem(itemName);
+
+          isQuestRunning =
+            JSON.parse(
+              res?.["data"]?.["items_by_column_values"]?.[0]?.[
+                "column_values"
+              ]?.[0]?.["value"],
+              null,
+              2
+            )["running"] == "true";
+
+          if (isQuestRunning === true) {
+            //something is running in monday
+            startHandler();
+          } else {
+            chrome.notifications.create({
+              type: "progress",
+              iconUrl: "/images/get_started128.png",
+              title: "River",
+              message:
+                "Something went wrong! No currenly running quest was found on Monday!",
+              progress: 0,
+            });
+          }
+          props.onBufferChange(false);
+        });
+    } else {
+      startHandler();
+
+      props.onBufferChange(false);
+    }
+  };
   const tickHandler = () => {
     props.onTick();
     // if (props.autoFocus !== false) {   <-------- now deprecated
@@ -33,7 +100,8 @@ const Timer = (props) => {
       autoFocus={props.autoFocus}
       onClick={() => {
         if (props.timerID === false) {
-          startHandler();
+          props.onBufferChange(true);
+          checkMonday();
         } else {
           // ascend action
           props.onAscend();
