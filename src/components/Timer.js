@@ -34,7 +34,7 @@ const Timer = (props) => {
       })
         .then((res) => res.json())
         .catch((e) => {
-          console.log(e);
+          // console.log(e);
           chrome.notifications.create({
             type: "progress",
             iconUrl: "/images/get_started128.png",
@@ -49,7 +49,7 @@ const Timer = (props) => {
           return;
         })
         .then((res) => {
-          console.log(res);
+          // console.log(res);
           if (res?.["data"]?.["items_by_column_values"] === undefined) {
             chrome.notifications.create({
               type: "progress",
@@ -93,7 +93,7 @@ const Timer = (props) => {
               //found a quest and it is not running, as desired
               startHandler();
               StartRecordingOut(itemName.id).then((res) => {
-                console.log(res);
+                // console.log(res);
                 props.onBufferChange(res);
               });
             } else {
