@@ -17,7 +17,7 @@ const BufferElement = (props) => {
       setMessage(false);
     } else if (props.isInitializing.current === true) {
       setMessage(false);
-    } else if (props.isActive === null) {
+    } else if (props.isActive === "force-hide") {
       setMessage(false);
     } else if (props.isActive === false) {
       setMessage(
@@ -46,6 +46,20 @@ const BufferElement = (props) => {
         setMessage(false);
       }, 2000);
     } else {
+      setMessage(
+        <div className="lds-roller">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      );
+    }
+    if (props.isActive === "force-show") {
       setMessage(
         <div className="lds-roller">
           <div></div>

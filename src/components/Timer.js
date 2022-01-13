@@ -30,6 +30,20 @@ const Timer = (props) => {
         }),
       })
         .then((res) => res.json())
+        .catch((e) => {
+          chrome.notifications.create({
+            type: "progress",
+            iconUrl: "/images/get_started128.png",
+            title: "River",
+            message: "Something went wrong connecting to Monday!...",
+
+            progress: 0,
+          });
+          // startHandler();
+
+          props.onBufferChange("force-hide");
+          return;
+        })
         .then((res) => {
           itemName = res?.["data"]?.["items_by_column_values"]?.[0]?.["name"];
 
@@ -61,8 +75,22 @@ const Timer = (props) => {
                 "Something went wrong! No currenly running quest was found on Monday!",
               progress: 0,
             });
-            props.onBufferChange(null);
+            props.onBufferChange(force - hide);
           }
+        })
+        .catch((e) => {
+          chrome.notifications.create({
+            type: "progress",
+            iconUrl: "/images/get_started128.png",
+            title: "River",
+            message: "Something went wrong after connecting to Monday!",
+
+            progress: 0,
+          });
+          // startHandler();
+
+          props.onBufferChange("force-hide");
+          return;
         });
     } else {
       startHandler();
@@ -101,7 +129,7 @@ const Timer = (props) => {
       autoFocus={props.autoFocus}
       onClick={() => {
         if (props.timerID === false) {
-          props.onBufferChange(true);
+          props.onBufferChange("force-show"); // undefined = force show buffer
           checkMonday(); // set buffer first and then check monday
         } else {
           // ascend action
