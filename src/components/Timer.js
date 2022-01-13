@@ -75,7 +75,7 @@ const Timer = (props) => {
                 "Something went wrong! No currenly running quest was found on Monday!",
               progress: 0,
             });
-            props.onBufferChange(force - hide);
+            props.onBufferChange("force-hide");
           }
         })
         .catch((e) => {
