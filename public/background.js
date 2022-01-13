@@ -115,7 +115,7 @@ const updateTimerState = () => {
         if (data.mode === 0) {
           chrome.action.setBadgeBackgroundColor({ color: "#800000" }); // red color
         } else {
-          chrome.action.setBadgeBackgroundColor({ color: "#6a0dad" }); // purple color (could also try b30086)
+          chrome.action.setBadgeBackgroundColor({ color: "#D4AF37" }); // gold color (could also try b30086,6a0dad,EEBC1D)
         }
         scheduleAlarm();
       }
@@ -251,7 +251,8 @@ chrome.storage.onChanged.addListener((changes) => {
   if (
     "savedTime" in changes ||
     "startedRecordingAt" in changes ||
-    "mode" in changes
+    "mode" in changes ||
+    "end" in changes // research later further if this causes any nasty bug or over refreshing
   ) {
     updateTimerState(); // update label
   }

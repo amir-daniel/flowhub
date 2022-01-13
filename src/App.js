@@ -234,8 +234,10 @@ function App() {
         "end",
         "userName",
         "totalSeconds",
+        "itemName",
       ],
       (data) => {
+        setItemName(data.itemName);
         dataDispatch({
           type: "USER_INITIALIZE",
           time:
