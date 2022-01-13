@@ -71,8 +71,7 @@ const Timer = (props) => {
               type: "progress",
               iconUrl: "/images/get_started128.png",
               title: "River",
-              message:
-                "Something went wrong! No currenly running quest was found on Monday!",
+              message: "No currenly running quest was found on Monday!", // "Something went wrong!" message removed
               progress: 0,
             });
             props.onBufferChange("force-hide");
@@ -100,9 +99,10 @@ const Timer = (props) => {
   };
   const tickHandler = () => {
     props.onTick();
-    // if (props.autoFocus !== false) {   <-------- now deprecated
-    //   inputRef?.current.focus();
-    // }
+    if (props.autoFocus !== false) {
+      // can turn it off if you don't want constant refocusing during recording
+      props.submitRef?.current?.focus();
+    }
   };
 
   const startHandler = () => {
