@@ -17,6 +17,8 @@ const BufferElement = (props) => {
       setMessage(false);
     } else if (props.isInitializing.current === true) {
       setMessage(false);
+    } else if (props.isActive === null) {
+      setMessage(false);
     } else if (props.isActive === false) {
       setMessage(
         <div>
@@ -65,7 +67,7 @@ const BufferElement = (props) => {
   return message == false ? (
     <div style={{ paddingTop: "4px" }}>{props.timeDisplay}</div>
   ) : (
-    <div style={{ paddingTop: "4px" }}>{message}</div> // maybe remove these paddings later
+    message
   );
 };
 

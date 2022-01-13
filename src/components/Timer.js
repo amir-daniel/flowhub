@@ -51,6 +51,7 @@ const Timer = (props) => {
           if (isQuestRunning === true) {
             //something is running in monday
             startHandler();
+            props.onBufferChange(false);
           } else {
             chrome.notifications.create({
               type: "progress",
@@ -60,8 +61,8 @@ const Timer = (props) => {
                 "Something went wrong! No currenly running quest was found on Monday!",
               progress: 0,
             });
+            props.onBufferChange(null);
           }
-          props.onBufferChange(false);
         });
     } else {
       startHandler();
@@ -101,7 +102,7 @@ const Timer = (props) => {
       onClick={() => {
         if (props.timerID === false) {
           props.onBufferChange(true);
-          checkMonday();
+          checkMonday(); // set buffer first and then check monday
         } else {
           // ascend action
           props.onAscend();
