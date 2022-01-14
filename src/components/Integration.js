@@ -3,11 +3,10 @@ const integrationEnabled = true; // or maybe state
 // later possible to add: "which integration: monday, ..., and also option to add private key"
 const showErrorMsg = (msg) => {
   chrome.notifications.create({
-    type: "progress",
+    type: "basic",
     iconUrl: "/images/get_started128.png",
     title: "River",
     message: msg,
-    progress: 0,
   });
 };
 export const StartRecordingOut = async (itemID) => {

@@ -15,11 +15,10 @@ const unknownETAChar = "∞";
 
 const showErrorMsg = (msg) => {
   chrome.notifications.create({
-    type: "progress",
+    type: "basic",
     iconUrl: "/images/get_started128.png",
     title: "River",
     message: msg,
-    progress: 0,
   });
 };
 

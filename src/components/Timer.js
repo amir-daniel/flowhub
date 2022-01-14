@@ -36,12 +36,10 @@ const Timer = (props) => {
         .catch((e) => {
           // console.log(e);
           chrome.notifications.create({
-            type: "progress",
+            type: "basic",
             iconUrl: "/images/get_started128.png",
             title: "River",
-            message: "Something went connecting to Monday!",
-
-            progress: 0,
+            message: "Something went wrong connecting to Monday!",
           });
           // startHandler();
 
@@ -52,20 +50,18 @@ const Timer = (props) => {
           // console.log(res);
           if (res?.["data"]?.["items_by_column_values"] === undefined) {
             chrome.notifications.create({
-              type: "progress",
+              type: "basic",
               iconUrl: "/images/get_started128.png",
               title: "River",
               message: "Connection rejected by Monday!", // "Something went wrong!" message removed
-              progress: 0,
             });
             props.onBufferChange("force-hide");
           } else if (res?.["data"]?.["items_by_column_values"]?.length === 0) {
             chrome.notifications.create({
-              type: "progress",
+              type: "basic",
               iconUrl: "/images/get_started128.png",
               title: "River",
               message: "No eligible quest was found on Monday!", // "Something went wrong!" message removed
-              progress: 0,
             });
             props.onBufferChange("force-hide");
           } else {
@@ -98,12 +94,11 @@ const Timer = (props) => {
               });
             } else {
               chrome.notifications.create({
-                type: "progress",
+                type: "basic",
                 iconUrl: "/images/get_started128.png",
                 title: "River",
                 message:
                   "Syncing error, found quests are already recording on Monday!", // "Something went wrong!" message removed
-                progress: 0,
               });
               props.onBufferChange("force-hide");
             }
@@ -111,12 +106,10 @@ const Timer = (props) => {
         })
         .catch((e) => {
           chrome.notifications.create({
-            type: "progress",
+            type: "basic",
             iconUrl: "/images/get_started128.png",
             title: "River",
             message: "Something went wrong after connecting to Monday!",
-
-            progress: 0,
           });
           //startHandler()
           props.onBufferChange("force-hide");
