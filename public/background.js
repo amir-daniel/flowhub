@@ -279,7 +279,7 @@ chrome.commands.onCommand.addListener((command) => {
                   )}.`
                 : `is staggering, and you have already amassed a time of ${beautifyForBadge(
                     (Date.now() - data.startedRecordingAt) / 1000
-                  )}.`
+                  )}. Your progress checkpoint is ${data.progress + 1}.`
             } `,
             progress:
               data.end === 0
