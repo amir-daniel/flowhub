@@ -11,15 +11,14 @@ const Timer = (props) => {
     if (shouldICheckMonday === true) {
       // arabic work ahead **WARNING**
       let query = `{
-      items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress", limit: 1) {
+      items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress") {
         name
         id
         column_values(ids: "time_tracking") {
           value
         }
       }
-    }
-    `;
+    }`; // removed "item_limit:1", seems pretty useless for now, and soon multiple items support
 
       fetch("https://api.monday.com/v2", {
         method: "post",

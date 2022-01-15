@@ -4,7 +4,7 @@ import NumberInput from "./components/NumberInput";
 import Timer from "./components/Timer";
 import BufferElement from "./components/BufferElement";
 import AnimatedProgressBar from "./components/AnimatedProgressBar";
-// import { stopRecordingAndWriteOut } from "./components/Integration";
+import { fetchItemData } from "./components/Integration";
 import { useState, useEffect, useReducer, useRef } from "react";
 
 const playFile = (filepath) => {
@@ -109,6 +109,24 @@ function App() {
         start: newVal < +state.start ? newVal : state.start,
         current: newVal < +state.current ? newVal : state.current,
         end: newVal,
+        time: state.time,
+        total: state.total,
+        timerID: state.timerID,
+      };
+    } else if (action.type === "IMPORT_DATA") {
+      let newStart = filterInput(+action.start, +state.start);
+      let newCurrent = filterInput(+action.current, +state.current);
+      let newEnd = filterInput(+action.end, +state.end);
+
+      return {
+        start:
+          newEnd < newStart
+            ? newEnd
+            : newCurrent < newStart
+            ? newCurrent
+            : newStart, // end takes precedence here, then current
+        current: newEnd < newCurrent ? newEnd : newCurrent,
+        end: newEnd,
         time: state.time,
         total: state.total,
         timerID: state.timerID,
@@ -402,7 +420,30 @@ function App() {
           </div>
         </div>
 
-        <div className="initialize-data seperated datasection">
+        <div
+          className="initialize-data seperated datasection"
+          id="input-container"
+          onClick={(event) => {
+            if (event.target.id === "input-container") {
+              setIsBuffering(true);
+
+              fetchItemData().then((res) => {
+                const [start, end, bufferingState] = res;
+
+                setIsBuffering(bufferingState);
+
+                if (start !== null && end !== null) {
+                  dataDispatch({
+                    type: "IMPORT_DATA",
+                    start: start,
+                    current: start,
+                    end: end,
+                  });
+                }
+              });
+            }
+          }}
+        >
           <div className="data-row">
             <div>Start</div>
             <NumberInput
