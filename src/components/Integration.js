@@ -102,38 +102,32 @@ export const fetchItemData = async () => {
     try {
       {
         let [start, end] = [
-          +JSON.parse(
-            // add + or no? a conversion already happens at a later stage
-            // so for now no, the only thing it does it remove data (loss of the ability to differentiate 0 and empty values)
-            res?.["data"]?.["items_by_column_values"]?.[0]?.[
-              "column_values"
-            ]?.[0]?.["value"],
-            null,
-            2
-          ),
-          +JSON.parse(
-            res?.["data"]?.["items_by_column_values"]?.[0]?.[
-              "column_values"
-            ]?.[1]?.["value"],
-            null,
-            2
-          ),
+          // add + or no? a conversion already happens at a later stage
+          // so for now no, the only thing it does it remove data (loss of the ability to differentiate 0 and empty values)
+          res?.["data"]?.["items_by_column_values"]?.[0]?.[
+            "column_values"
+          ]?.[0]?.["value"],
+          res?.["data"]?.["items_by_column_values"]?.[0]?.[
+            "column_values"
+          ]?.[1]?.["value"],
+          ,
         ];
 
-        if (res?.["data"]?.["items_by_column_values"] === undefined) {
-          chrome.notifications.create({
-            type: "basic",
-            iconUrl: "/images/get_started128.png",
-            title: "River",
-            message: "Connection rejected by Monday!", // "Something went wrong!" message removed
-          });
-          return [null, null, "force-hide"];
-        } else if (res?.["data"]?.["items_by_column_values"]?.length === 0) {
+        if (res?.["data"]?.["items_by_column_values"]?.length === 0) {
           chrome.notifications.create({
             type: "basic",
             iconUrl: "/images/get_started128.png",
             title: "River",
             message: "No eligible quest was found on Monday!", // "Something went wrong!" message removed
+          });
+          return [null, null, "force-hide"];
+        }
+        if (start === undefined || end === undefined) {
+          chrome.notifications.create({
+            type: "basic",
+            iconUrl: "/images/get_started128.png",
+            title: "River",
+            message: "Connection rejected by Monday!", // "Something went wrong!" message removed
           });
           return [null, null, "force-hide"];
         } else if (res?.["data"]?.["items_by_column_values"]?.length > 1) {
@@ -145,17 +139,22 @@ export const fetchItemData = async () => {
               "More than one quest discovered. Currently no support for parallel items!", // check this works
           });
           return [null, null, "force-hide"];
-        } else if (!Number.isInteger(+start) || !Number.isInteger(+end)) {
-          chrome.notifications.create({
-            type: "basic",
-            iconUrl: "/images/get_started128.png",
-            title: "River",
-            message: "Bad input received. Import failed!", // check this works
-          });
-          return [null, null, "force-hide"];
         } else {
-          // success
-          return [start, end, "force-hide"];
+          start = +JSON.parse(start, null, 2);
+          end = +JSON.parse(end, null, 2);
+
+          if (!Number.isInteger(+start) || !Number.isInteger(+end)) {
+            chrome.notifications.create({
+              type: "basic",
+              iconUrl: "/images/get_started128.png",
+              title: "River",
+              message: "Bad input received. Import failed!", // check this works
+            });
+            return [null, null, "force-hide"];
+          } else {
+            // success
+            return [start, end, "force-hide"];
+          }
         }
       }
     } catch (e) {

@@ -103,6 +103,16 @@ body {
   background-color: #ebb82d;
   color: #5c4004;
 }
+
+.input-changed {
+  background-color: #ebb82d;
+  color: #5c4004;
+}
+
+.input-changed::placeholder {
+  color: #5c4004;
+}
+
 .seperated {
   border-bottom: 1px solid #2f3237;
   padding: 8px 12px 8px;
