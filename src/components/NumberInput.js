@@ -22,6 +22,12 @@ const NumberInput = (props) => {
   return (
     <div>
       <input
+        onFocus={() => {
+          props.onChoose();
+        }}
+        onBlur={() => {
+          props.onLose();
+        }}
         min={0}
         onKeyDown={props.onSubmit}
         type="number"

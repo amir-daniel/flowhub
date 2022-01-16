@@ -20,10 +20,13 @@ function App() {
   const isInInitialization = useRef(true); // to signal to the buffer not to load while first initializing
   const isBufferingRef = useRef(false);
   const [itemObject, setItemObject] = useState(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   let inputRef = useRef(null);
+  let isInputFocusedRef = useRef(false);
 
   isBufferingRef.current = isBuffering;
+  isInputFocusedRef.current = isInputFocused;
 
   const designDigit = (num) => (+num < 10 ? "0" + num : num);
 
@@ -447,6 +450,12 @@ function App() {
           <div className="data-row">
             <div>Start</div>
             <NumberInput
+              onChoose={() => {
+                setIsInputFocused(true);
+              }}
+              onLose={() => {
+                setIsInputFocused(false);
+              }}
               min={0}
               className="data-input"
               onSubmit={(event) => {
@@ -467,6 +476,12 @@ function App() {
           <div className="data-row">
             <div>Progress</div>
             <NumberInput
+              onChoose={() => {
+                setIsInputFocused(true);
+              }}
+              onLose={() => {
+                setIsInputFocused(false);
+              }}
               className="data-input"
               placeholder="0"
               onSubmit={(event) => {
@@ -486,6 +501,12 @@ function App() {
           <div className="data-row">
             <div>Finish</div>
             <NumberInput
+              onChoose={() => {
+                setIsInputFocused(true);
+              }}
+              onLose={() => {
+                setIsInputFocused(false);
+              }}
               className="data-input"
               placeholder="0"
               onSubmit={(event) => {
@@ -543,7 +564,7 @@ function App() {
             <Timer
               onBufferChange={setIsBuffering}
               submitRef={inputRef}
-              autoFocus={true}
+              stopFocusRef={isInputFocusedRef}
               timerID={dataState.timerID}
               onStartNewItem={setItemObject}
               onAscend={() => {

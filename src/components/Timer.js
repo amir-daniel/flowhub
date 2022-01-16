@@ -122,7 +122,8 @@ const Timer = (props) => {
   };
   const tickHandler = () => {
     props.onTick();
-    if (props.autoFocus !== false) {
+
+    if (props.stopFocusRef.current === false) {
       // can turn it off if you don't want constant refocusing during recording
       props.submitRef?.current?.focus();
     }
@@ -149,7 +150,7 @@ const Timer = (props) => {
   return (
     <button
       ref={props.submitRef}
-      autoFocus={props.autoFocus}
+      autoFocus={!props.stopFocusRef.current}
       onClick={() => {
         if (props.timerID === false) {
           props.onBufferChange("force-show"); // force show buffer
