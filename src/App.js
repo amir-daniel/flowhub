@@ -537,6 +537,7 @@ function App() {
                 dataState.timerID === false
                   ? () => dataDispatch({ type: "TIME_RESET" })
                   : () =>
+                      // notice that syncing to the Time Management app (ie. Monday) is done in the backend
                       chrome.storage.sync.get(
                         ["startedRecordingAt"],
                         (data) => {
