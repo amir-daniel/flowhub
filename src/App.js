@@ -228,6 +228,15 @@ function App() {
 
   let [getUserName, setUserName] = useState(null);
   let [timeToShow, setTimeToShow] = useState(false); // it's false here to suit the JSX element later
+  let [muteMode, setMuteMode] = useState(false);
+  const switchMuteMode = () => {
+    chrome.storage.sync.get(["muteMode"], (data) => {
+      setMuteMode(data.muteMode === true ? false : true);
+      chrome.storage.sync.set({
+        muteMode: data.muteMode === true ? false : true,
+      });
+    });
+  };
 
   useEffect(() => {
     if (dataState.timerID === false) {
@@ -257,6 +266,7 @@ function App() {
         "userName",
         "totalSeconds",
         "itemName",
+        "muteMode",
       ],
       (data) => {
         setItemObject(data.itemName);
@@ -274,6 +284,7 @@ function App() {
           total: data.totalSeconds,
         });
         setUserName(data.userName);
+        setMuteMode(data.muteMode);
         isInInitialization.current = false;
       }
     );
@@ -413,13 +424,18 @@ function App() {
       </div>
       {/* off grid */}
       <div className="Card-layout">
-        <div className="stats seperated datasection">
+        <div
+          onClick={() => {
+            switchMuteMode();
+          }}
+          className="stats seperated datasection"
+        >
           <div>
             <b>Stats</b>
           </div>
           <div>
             You have in total <b>{Math.round(dataState.total / 3600)}</b>{" "}
-            recorded hours.
+            recorded hours.{` Mode: ${muteMode === true ? "🔈" : "🔊"}`}
           </div>
         </div>
 

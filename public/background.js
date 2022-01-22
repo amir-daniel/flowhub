@@ -8,6 +8,7 @@ let timerName = "timer";
 let etaMode = false;
 let userName = "River";
 let itemName = null;
+let muteMode = false;
 const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
 let mode = 0; // for now it's local, and not accessable from the popup
@@ -184,7 +185,10 @@ const updateTimerState = () => {
           } else {
             chrome.action.setBadgeText({
               // show infinity as ETA in that case
-              text: unknownETAChar,
+              text:
+                data.progress === data.end && data.start !== data.progress
+                  ? "✅"
+                  : unknownETAChar,
             });
           }
         } else {
@@ -246,6 +250,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ totalSeconds });
   chrome.storage.sync.set({ mode });
   chrome.storage.sync.set({ itemName });
+  chrome.storage.sync.set({ muteMode });
 });
 
 chrome.commands.onCommand.addListener((command) => {
@@ -257,39 +262,49 @@ chrome.commands.onCommand.addListener((command) => {
     });
   } else if (command === "progress-up") {
     chrome.storage.sync.get(
-      ["start", "progress", "end", "startedRecordingAt", "savedTime", "mode"],
+      [
+        "start",
+        "progress",
+        "end",
+        "startedRecordingAt",
+        "savedTime",
+        "mode",
+        "muteMode",
+      ],
       (data) => {
         if (data.progress < data.end && data.startedRecordingAt !== null) {
           chrome.storage.sync.set({ progress: data.progress + 1 });
           // don't forget to update in Timer.js the checker
-          chrome.notifications.create({
-            type: "progress",
-            iconUrl: "/images/get_started128.png",
-            title: "River",
-            message: `Hi there, just wanted to let you know that your progress ${
-              data.progress + 1 === data.end // it's progress + 1,
-                ? // noticed that we incremented it a few lines ago
-                  "was staggering, and you are done! ✅"
-                : data.mode === 0
-                ? `is staggering, and you are destined to be done at ${getETA(
-                    data.progress + 1,
-                    data.start,
-                    data.end,
-                    (Date.now() - data.startedRecordingAt) / 1000
-                  )}.`
-                : `is staggering, and you have already amassed a time of ${beautifyForBadge(
-                    (Date.now() - data.startedRecordingAt) / 1000
-                  )}. Your progress checkpoint is ${data.progress + 1}.`
-            } `,
-            progress:
-              data.end === 0
-                ? 0
-                : Math.floor(
-                    ((data.progress + 1 - data.start) /
-                      (data.end - data.start)) *
-                      100
-                  ),
-          });
+          if (data.muteMode === false) {
+            chrome.notifications.create({
+              type: "progress",
+              iconUrl: "/images/get_started128.png",
+              title: "River",
+              message: `Hi there, just wanted to let you know that your progress ${
+                data.progress + 1 === data.end // it's progress + 1,
+                  ? // noticed that we incremented it a few lines ago
+                    "was staggering, and you are done! ✅"
+                  : data.mode === 0
+                  ? `is staggering, and you are destined to be done at ${getETA(
+                      data.progress + 1,
+                      data.start,
+                      data.end,
+                      (Date.now() - data.startedRecordingAt) / 1000
+                    )}.`
+                  : `is staggering, and you have already amassed a time of ${beautifyForBadge(
+                      (Date.now() - data.startedRecordingAt) / 1000
+                    )}. Your progress checkpoint is ${data.progress + 1}.`
+              } `,
+              progress:
+                data.end === 0
+                  ? 0
+                  : Math.floor(
+                      ((data.progress + 1 - data.start) /
+                        (data.end - data.start)) *
+                        100
+                    ),
+            });
+          }
           if (data.progress + 1 === data.end) {
             chrome.alarms.clearAll();
             chrome.storage.sync.set(
@@ -320,6 +335,38 @@ chrome.alarms.onAlarm.addListener(onTick);
 
 chrome.runtime.onStartup.addListener(updateTimerState);
 
+const updateStats = () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    var currTab = tabs[0];
+    if (currTab) {
+      chrome.storage.sync.get(
+        ["start", "progress", "end", "startedRecordingAt"],
+        (data) => {
+          if (data.startedRecordingAt === null) {
+            if (data.end === data.start) {
+              chrome.tabs.sendMessage(currTab.id, 0);
+            } else if (data.end === data.progress) {
+              chrome.tabs.sendMessage(currTab.id, 1);
+            } else {
+              chrome.tabs.sendMessage(
+                currTab.id,
+                (data.progress - data.start) / (data.end - data.start)
+              );
+            }
+          } else if (data.end - data.start === 0) {
+            chrome.tabs.sendMessage(currTab.id, 0);
+          } else {
+            chrome.tabs.sendMessage(
+              currTab.id,
+              (data.progress - data.start) / (data.end - data.start)
+            );
+          }
+        }
+      );
+    }
+  });
+};
+
 chrome.storage.onChanged.addListener((changes) => {
   if ("startedRecordingAt" in changes) {
     if (changes.startedRecordingAt.newValue === null) {
@@ -345,6 +392,9 @@ chrome.storage.onChanged.addListener((changes) => {
     }
   }
 
+  if ("start" in changes || "progress" in changes || "end" in changes) {
+    updateStats();
+  }
   if (
     "savedTime" in changes ||
     "startedRecordingAt" in changes ||
@@ -353,4 +403,12 @@ chrome.storage.onChanged.addListener((changes) => {
   ) {
     updateTimerState(); // update label
   }
+});
+
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  updateStats();
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  updateStats();
 });

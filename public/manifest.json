@@ -5,11 +5,19 @@
   "manifest_version": 3,
   "options_page": "index.html",
   "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["content-style.css"],
+      "js": ["display.js", "content-script.js"]
+    }
+  ],
   "permissions": [
     "storage",
     "activeTab",
     "scripting",
     "notifications",
+    "tabs",
     "alarms"
   ],
   "commands": {
