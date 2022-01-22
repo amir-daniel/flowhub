@@ -344,7 +344,7 @@ const updateStats = () => {
         (data) => {
           if (data.startedRecordingAt === null) {
             if (data.end === data.start) {
-              chrome.tabs.sendMessage(currTab.id, 0);
+              chrome.tabs.sendMessage(currTab.id, "off");
             } else if (data.end === data.progress) {
               chrome.tabs.sendMessage(currTab.id, 1);
             } else {
@@ -392,7 +392,12 @@ chrome.storage.onChanged.addListener((changes) => {
     }
   }
 
-  if ("start" in changes || "progress" in changes || "end" in changes) {
+  if (
+    "start" in changes ||
+    "progress" in changes ||
+    "end" in changes ||
+    "startedRecordingAt" in changes
+  ) {
     updateStats();
   }
   if (
