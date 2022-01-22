@@ -41,8 +41,10 @@ body {
   transition: background-color 0.2s, color 0.2s;
   font-size: 12px;
   line-height: 16px;
-  background-color: #badfff;
-  color: #1976f0;
+  /* background-color: #badfff;
+  color: #1976f0; */
+  background-color: #ffbad6;
+  color: #981162;
   border-radius: 4px;
   padding: 2px 4px;
   cursor: pointer;
@@ -50,8 +52,8 @@ body {
   font-weight: 700;
 }
 .mode:hover {
-  background-color: #1976f0;
-  color: #badfff;
+  background-color: #981162;
+  color: #ffbad6;
 }
 
 .Card-layout {

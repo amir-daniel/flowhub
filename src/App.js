@@ -408,10 +408,10 @@ function App() {
           </b>
         </a>
         <a onClick={timeAddHandler} className="mode">
-          Import Time
+          In Sync
         </a>
       </div>
-
+      {/* off grid */}
       <div className="Card-layout">
         <div className="stats seperated datasection">
           <div>
