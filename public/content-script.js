@@ -1,11 +1,21 @@
 chrome.runtime.sendMessage("tab-startup");
 
+function notify(msg) {
+  if (+msg === 1) {
+    document.querySelector("#injected-audio2").play();
+  } else if (+msg > 0) {
+    document.querySelector("#injected-audio").play();
+  }
+}
+
 chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
   var progressContainer = document.getElementById("pc");
 
   if (msg === "off") {
     progressContainer.style.visibility = "hidden";
   } else {
+    notify(+msg);
+
     progressContainer.style.visibility = "visible";
     let backgroundColor =
       +msg >= 0.978

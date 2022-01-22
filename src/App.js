@@ -9,7 +9,7 @@ import { useState, useEffect, useReducer, useRef } from "react";
 
 const playFile = (filepath) => {
   var audioPlayer = new Audio(chrome.runtime.getURL(filepath));
-  audioPlayer.play();
+  //audioPlayer.play();
 };
 
 function App() {

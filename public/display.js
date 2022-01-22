@@ -47,6 +47,12 @@ function draw() {
       //   }
     }
   }
+  const audio = new Audio(chrome.runtime.getURL("sounds/increment.mp3"));
+  audio.id = "injected-audio";
+  document.body.appendChild(audio);
+  const audio2 = new Audio(chrome.runtime.getURL("sounds/complete.mp3"));
+  audio2.id = "injected-audio2";
+  document.body.appendChild(audio2);
 }
 
 draw();
