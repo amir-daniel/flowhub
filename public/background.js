@@ -341,7 +341,7 @@ chrome.alarms.onAlarm.addListener(onTick);
 
 chrome.runtime.onStartup.addListener(updateTimerState);
 
-const updateStats = () => {
+const updateStats = (receivedMessage) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     var currTab = tabs[0];
     if (currTab) {
@@ -352,20 +352,26 @@ const updateStats = () => {
             if (data.end === data.start) {
               chrome.tabs.sendMessage(currTab.id, "off");
             } else if (data.end === data.progress) {
-              chrome.tabs.sendMessage(currTab.id, 1);
+              chrome.tabs.sendMessage(currTab.id, {
+                val: 1,
+                msg: receivedMessage,
+              });
             } else {
-              chrome.tabs.sendMessage(
-                currTab.id,
-                (data.progress - data.start) / (data.end - data.start)
-              );
+              chrome.tabs.sendMessage(currTab.id, {
+                val: (data.progress - data.start) / (data.end - data.start),
+                msg: receivedMessage,
+              });
             }
           } else if (data.end - data.start === 0) {
-            chrome.tabs.sendMessage(currTab.id, 0);
+            chrome.tabs.sendMessage(currTab.id, {
+              val: 0,
+              msg: receivedMessage,
+            });
           } else {
-            chrome.tabs.sendMessage(
-              currTab.id,
-              (data.progress - data.start) / (data.end - data.start)
-            );
+            chrome.tabs.sendMessage(currTab.id, {
+              val: (data.progress - data.start) / (data.end - data.start),
+              msg: receivedMessage,
+            });
           }
         }
       );
@@ -404,7 +410,11 @@ chrome.storage.onChanged.addListener((changes) => {
     "end" in changes ||
     "startedRecordingAt" in changes
   ) {
-    updateStats();
+    if ("progress" in changes) {
+      updateStats();
+    } else {
+      updateStats("no-audio");
+    }
   }
   if (
     "savedTime" in changes ||
@@ -417,9 +427,9 @@ chrome.storage.onChanged.addListener((changes) => {
 });
 
 chrome.tabs.onActivated.addListener((activeInfo) => {
-  updateStats();
+  updateStats("no-audio");
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  updateStats();
+  updateStats("no-audio");
 });

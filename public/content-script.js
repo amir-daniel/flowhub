@@ -21,26 +21,29 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
   if (msg === "off") {
     progressContainer.style.visibility = "hidden";
   } else {
-    notify(+msg);
-
+    if (msg.msg !== "no-audio") {
+      notify(+msg.val);
+    }
     progressContainer.style.visibility = "visible";
     let backgroundColor =
-      +msg >= 0.978
+      +msg.val >= 0.978
         ? "#3fffa2"
-        : +msg >= 0.567
+        : +msg.val >= 0.567
         ? "#e9f08c"
-        : +msg >= 0.33
+        : +msg.val >= 0.33
         ? "#ffdb3a"
         : "#e5405e";
     let textColor =
-      +msg >= 0.978 ? "#09492A" : +msg >= 0.33 ? "#AA5B00" : "#821226";
+      +msg.val >= 0.978 ? "#09492A" : +msg.val >= 0.33 ? "#AA5B00" : "#821226";
 
     document.querySelector(
       ".bg"
     ).style.background = `conic-gradient(${backgroundColor} ${
-      +msg * 360
-    }deg, #ddd ${+msg * 360}deg)`;
+      +msg.val * 360
+    }deg, #ddd ${+msg.val * 360}deg)`;
     document.getElementById("ol").innerHTML =
-      `<span style="color:${textColor}">` + Math.floor(+msg * 100) + "%</span>";
+      `<span style="color:${textColor}">` +
+      Math.floor(+msg.val * 100) +
+      "%</span>";
   }
 });
