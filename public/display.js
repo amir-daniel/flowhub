@@ -26,13 +26,24 @@ function draw() {
       // document.body.prepend(progressContainer);
       document.body.insertBefore(progressContainer, document.body.firstChild);
 
+      // insert audio
+      const audio = new Audio(chrome.runtime.getURL("sounds/increment.mp3"));
+      audio.id = "injected-audio";
+      // audio.crossOrigin = "anonymous";
+      document.body.appendChild(audio);
+      const audio2 = new Audio(chrome.runtime.getURL("sounds/complete.mp3"));
+      audio2.id = "injected-audio2";
+      // audio2.crossOrigin = "anonymous";
+      document.body.appendChild(audio2);
+      // /insert audio
+
       created = true;
       drawn = true;
     } else {
-      var progressContainer = document.getElementById(
-        "exentsion-progress-container"
-      );
-      progressContainer.style.visibility = "visible";
+      // var progressContainer = document.getElementById(
+      //   "exentsion-progress-container"
+      // );
+      // progressContainer.style.visibility = "visible";
       drawn = true;
     }
     // }
@@ -47,12 +58,6 @@ function draw() {
       //   }
     }
   }
-  const audio = new Audio(chrome.runtime.getURL("sounds/increment.mp3"));
-  audio.id = "injected-audio";
-  document.body.appendChild(audio);
-  const audio2 = new Audio(chrome.runtime.getURL("sounds/complete.mp3"));
-  audio2.id = "injected-audio2";
-  document.body.appendChild(audio2);
 }
 
 draw();

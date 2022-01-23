@@ -1,10 +1,17 @@
 chrome.runtime.sendMessage("tab-startup");
 
 function notify(msg) {
+  let playObj;
   if (+msg === 1) {
-    document.querySelector("#injected-audio2").play();
+    playObj = document.querySelector("#injected-audio2").play();
   } else if (+msg > 0) {
-    document.querySelector("#injected-audio").play();
+    playObj = document.querySelector("#injected-audio").play();
+  }
+
+  if (playObj !== undefined) {
+    playObj.catch((e) => {
+      console.log("Something went wrong playing sound! " + e.message);
+    });
   }
 }
 
@@ -25,6 +32,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
         : +msg >= 0.33
         ? "#ffdb3a"
         : "#e5405e";
+    let textColor =
+      +msg >= 0.978 ? "#09492A" : +msg >= 0.33 ? "#AA5B00" : "#821226";
 
     document.querySelector(
       ".bg"
@@ -32,8 +41,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
       +msg * 360
     }deg, #ddd ${+msg * 360}deg)`;
     document.getElementById("ol").innerHTML =
-      `<span style="color:${backgroundColor}">` +
-      Math.floor(+msg * 100) +
-      "%</span>";
+      `<span style="color:${textColor}">` + Math.floor(+msg * 100) + "%</span>";
   }
 });

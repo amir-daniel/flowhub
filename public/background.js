@@ -14,13 +14,19 @@ const ETA_MODE = 1;
 let mode = 0; // for now it's local, and not accessable from the popup
 const unknownETAChar = "∞";
 
-const showErrorMsg = (msg) => {
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: "/images/get_started128.png",
-    title: "River",
-    message: msg,
-  });
+const showErrorMsg = (msg, checkMute = false) => {
+  if (checkMute === true) {
+    chrome.storage.sync.get(["muteMode"], (data) => {
+      if (data.muteMode !== true) {
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "/images/get_started128.png",
+          title: "River",
+          message: msg,
+        });
+      }
+    });
+  }
 };
 
 const stopRecordingAndWriteOut = async (
@@ -83,7 +89,7 @@ const stopRecordingAndWriteOut = async (
           );
           return "force-hide";
         } else {
-          showErrorMsg("Item sync was successful!");
+          showErrorMsg("Item was successful!", true);
           return false;
         }
       })
