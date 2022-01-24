@@ -44,7 +44,7 @@ const BufferElement = (props) => {
       );
       cleaningTimer = setTimeout(() => {
         setMessage(false);
-      }, 2000);
+      }, 2000); // takes ~2s to finish animating
     } else {
       setMessage(
         <div className="lds-roller">
