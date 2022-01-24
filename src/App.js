@@ -415,7 +415,8 @@ function App() {
           <b>
             {dataState.timerID !== false &&
             itemObject?.name !== null &&
-            itemObject?.name !== undefined ? (
+            itemObject?.name !== undefined &&
+            offlineMode === false ? (
               <span style={{ color: "red" }}>{itemObject?.name}</span>
             ) : (
               "@" + getUserName
