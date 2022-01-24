@@ -229,7 +229,7 @@ function App() {
 
   let [getUserName, setUserName] = useState(null);
   let [timeToShow, setTimeToShow] = useState(false); // it's false here to suit the JSX element later
-  let [muteMode, setMuteMode] = useState(false);
+  let [muteMode, setMuteMode] = useState(true);
   const switchMuteMode = () => {
     chrome.storage.sync.get(["muteMode"], (data) => {
       setMuteMode(data.muteMode === true ? false : true);

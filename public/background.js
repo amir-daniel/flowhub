@@ -8,7 +8,7 @@ let timerName = "timer";
 let etaMode = false;
 let userName = "River";
 let itemName = null;
-let muteMode = false;
+let muteMode = true;
 let offlineMode = true;
 
 const ELAPSED_MODE = 0;
