@@ -1,3 +1,24 @@
+@font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 500;
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/space-grotesk-latin-regular.woff");
+}
+/* @font-face {
+  font-family: Space Grotesk;
+  font-style: normal;
+  font-weight: 700;
+  src: url(/public/fonts/space-grotesk/space-grotesk-latin-semibold.eot);
+  src: local("Space Grotesk SemiBold"), local("SpaceGrotesk-SemiBold"),
+    url(/public/fonts/space-grotesk/space-grotesk-latin-semibold.eot?#iefix)
+      format("embedded-opentype"),
+    url(/public/fonts/space-grotesk/space-grotesk-latin-semibold.woff)
+      format("woff"),
+    url(/public/fonts/space-grotesk/space-grotesk-latin-semibold.ttf)
+      format("truetype"),
+    url(/public/fonts/space-grotesk/space-grotesk-latin-semibold.svg#SpaceGrotesk)
+      format("svg");
+} */
 .pc {
   position: fixed;
   bottom: 10px;
@@ -20,7 +41,7 @@
   border-radius: 50%;
   width: 44px;
   height: 44px;
-  background: #fff;
+  background: #1d1e20;
   position: absolute;
   margin-top: 8px;
   margin-left: 8px;
@@ -30,4 +51,6 @@
   align-items: center;
   justify-content: center;
   display: flex;
+
+  font: normal 400 1rem Space Grotesk, sans-serif;
 }

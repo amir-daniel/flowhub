@@ -10,6 +10,7 @@ function notify(msg) {
 
   if (playObj !== undefined) {
     playObj.catch((e) => {
+      // alert("error");
       console.log("Something went wrong playing sound! " + e.message);
     });
   }
@@ -33,8 +34,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
         : +msg.val >= 0.33
         ? "#ffdb3a"
         : "#e5405e";
-    let textColor =
-      +msg.val >= 0.978 ? "#09492A" : +msg.val >= 0.33 ? "#AA5B00" : "#821226";
+    // let textColor =
+    //   +msg.val >= 0.978 ? "#09492A" : +msg.val >= 0.33 ? "#AA5B00" : "#821226";
 
     document.querySelector(
       ".bg"
@@ -42,7 +43,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
       +msg.val * 360
     }deg, #ddd ${+msg.val * 360}deg)`;
     document.getElementById("ol").innerHTML =
-      `<span style="color:${textColor}">` +
+      `<span style="color:${backgroundColor}">` +
       Math.floor(+msg.val * 100) +
       "%</span>";
   }

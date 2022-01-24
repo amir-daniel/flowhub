@@ -37,6 +37,33 @@ function draw() {
       document.body.appendChild(audio2);
       // /insert audio
 
+      // fontface;
+
+      // let link = document.createElement("link");
+      // link.setAttribute("rel", "stylesheet");
+      // link.setAttribute("type", "text/css");
+      // link.setAttribute(
+      //   "href",
+      //   chrome.runtime.getURL("/content-style2.css")
+      //   //"https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600"
+      // );
+      // // alert(chrome.runtime.getURL("/fonts/space-grotesk-latin-regular.woff"));
+      // document.head.appendChild(link);
+      // ------------------------------------->
+      // var styles = `@font-face {font-family: Space Grotesk; font-style: normal; font-weight: 500; src: url("${chrome.runtime.getURL(
+      //   "/fonts/space-grotesk-latin-regular.woff"
+      // )}");}`;
+
+      // var styleSheet = document.createElement("style");
+      // styleSheet.setAttribute("type", "text/css");
+
+      // styleSheet.innerText = styles;
+
+      // document.head.appendChild(styleSheet);
+
+      //fontface
+      // <-------------------------------------------
+
       created = true;
       drawn = true;
     } else {

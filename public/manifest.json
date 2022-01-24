@@ -22,7 +22,11 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["sounds/*"],
+      "resources": ["/sounds/*"],
+      "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["/fonts/*"],
       "matches": ["<all_urls>"]
     }
   ],
