@@ -323,7 +323,7 @@ function App() {
             setIsBuffering(false);
           }
         );
-      }, 2000); // add buffering
+      }, 500); // add buffering
       setIsBuffering(true);
     }
     return () => {
