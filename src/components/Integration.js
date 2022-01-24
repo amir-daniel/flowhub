@@ -1,5 +1,5 @@
 /*global chrome*/
-const integrationEnabled = true; // or maybe state
+
 // later possible to add: "which integration: monday, ..., and also option to add private key"
 const showErrorMsg = (msg) => {
   chrome.notifications.create({
@@ -9,8 +9,8 @@ const showErrorMsg = (msg) => {
     message: msg,
   });
 };
-export const StartRecordingOut = async (itemID) => {
-  if (integrationEnabled === true) {
+export const StartRecordingOut = async (itemID, offlineMode) => {
+  if (offlineMode !== true) {
     let query5 = `mutation ($data: JSON!) {
             change_multiple_column_values(board_id: 1774709998, item_id: ${itemID}, column_values: $data) {
               id
@@ -57,11 +57,11 @@ export const StartRecordingOut = async (itemID) => {
   }
 };
 
-export const fetchItemData = async () => {
+export const fetchItemData = async (offlineMode) => {
   // add in NumberInput.js a style change (!)
   // returns [start, end, bufferingState]
   // start, end could be null
-  if (integrationEnabled === true) {
+  if (offlineMode !== true) {
     let res;
     let query = `{
       items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress") {
@@ -168,6 +168,7 @@ export const fetchItemData = async () => {
       return [null, null, "force-hide"];
     }
   } else {
+    alert(`can't fetch data in Off Grid mode!`);
     return [null, null, "force-hide"];
   }
 };

@@ -6,10 +6,9 @@ const Timer = (props) => {
   const checkMonday = async () => {
     let isQuestRunning;
     let itemName;
-    const shouldICheckMonday = true; // turn it off when saving version for daniel
 
-    if (shouldICheckMonday === true) {
-      // arabic work ahead **WARNING**
+    if (props.offlineMode !== true) {
+      // arabic work ahead **WARNING** REFACTOR !!!!
       let query = `{
       items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress") {
         name
@@ -87,7 +86,7 @@ const Timer = (props) => {
             if (isQuestRunning === false) {
               //found a quest and it is not running, as desired
               startHandler();
-              StartRecordingOut(itemName.id).then((res) => {
+              StartRecordingOut(itemName.id, props.offlineMode).then((res) => {
                 // console.log(res);
                 props.onBufferChange(res);
               });

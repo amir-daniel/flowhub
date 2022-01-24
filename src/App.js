@@ -230,6 +230,7 @@ function App() {
   let [getUserName, setUserName] = useState(null);
   let [timeToShow, setTimeToShow] = useState(false); // it's false here to suit the JSX element later
   let [muteMode, setMuteMode] = useState(true);
+
   const switchMuteMode = () => {
     chrome.storage.sync.get(["muteMode"], (data) => {
       setMuteMode(data.muteMode === true ? false : true);
@@ -464,7 +465,7 @@ function App() {
             if (event.target.id === "input-container") {
               setIsBuffering(true);
 
-              fetchItemData().then((res) => {
+              fetchItemData(offlineMode).then((res) => {
                 const [start, end, bufferingState] = res;
 
                 setIsBuffering(bufferingState);
@@ -597,6 +598,7 @@ function App() {
               }
             />
             <Timer
+              offlineMode={offlineMode}
               onBufferChange={setIsBuffering}
               submitRef={inputRef}
               stopFocusRef={isInputFocusedRef}
