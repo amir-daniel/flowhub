@@ -389,7 +389,14 @@ chrome.storage.onChanged.addListener((changes) => {
       chrome.alarms.clear(timerName);
 
       chrome.storage.sync.get(
-        ["startedRecordingAt", "start", "progress", "end", "itemName"],
+        [
+          "startedRecordingAt",
+          "start",
+          "progress",
+          "end",
+          "itemName",
+          "offlineMode",
+        ],
         (data) => {
           if (data?.itemName?.id !== undefined) {
             // notice that if value changes manually through popup while recording is not on, syncing will not take place
@@ -399,7 +406,7 @@ chrome.storage.onChanged.addListener((changes) => {
               data.start,
               data.progress,
               data.end,
-              true // ARABIC WORK cancel this when saving a version for daniel
+              !data.offlineMode
             );
           }
         }
