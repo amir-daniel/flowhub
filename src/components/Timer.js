@@ -54,12 +54,16 @@ const Timer = (props) => {
               message: "Connection rejected by Monday!", // "Something went wrong!" message removed
             });
             props.onBufferChange("force-hide");
-          } else if (res?.["data"]?.["items_by_column_values"]?.length === 0) {
+          } else if (res?.["data"]?.["items_by_column_values"]?.length !== 1) {
             chrome.notifications.create({
               type: "basic",
               iconUrl: "/images/get_started128.png",
               title: "River",
-              message: "No eligible quest was found on Monday!", // "Something went wrong!" message removed
+              message:
+                res?.["data"]?.["items_by_column_values"]?.length > 1
+                  ? "More than one quest discovered. Currently no support for parallel items!" // > 1
+                  : "No eligible quest was found on Monday!", // === 0
+              // Something went wrong!" message removed
             });
             props.onBufferChange("force-hide");
           } else {
