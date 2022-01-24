@@ -486,6 +486,7 @@ function App() {
           <div className="data-row">
             <div>Start</div>
             <NumberInput
+              offlineMode={offlineMode}
               onChoose={() => {
                 setIsInputFocused(true);
               }}
@@ -512,6 +513,7 @@ function App() {
           <div className="data-row">
             <div>Progress</div>
             <NumberInput
+              offlineMode={offlineMode}
               onChoose={() => {
                 setIsInputFocused(true);
               }}
@@ -537,6 +539,7 @@ function App() {
           <div className="data-row">
             <div>Finish</div>
             <NumberInput
+              offlineMode={offlineMode}
               onChoose={() => {
                 setIsInputFocused(true);
               }}

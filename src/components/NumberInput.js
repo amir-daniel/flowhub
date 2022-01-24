@@ -32,7 +32,11 @@ const NumberInput = (props) => {
         onKeyDown={props.onSubmit}
         type="number"
         className={
-          props.className + (justChanged === true ? " input-changed" : "")
+          props.className +
+          (justChanged === true ? " input-changed" : "") +
+          (props.offlineMode === true
+            ? " data-input-offline"
+            : " data-input-online")
         }
         placeholder={props.placeholder}
         onChange={props.onChange}
