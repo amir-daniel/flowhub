@@ -21,6 +21,7 @@ function App() {
   const isBufferingRef = useRef(false);
   const [itemObject, setItemObject] = useState(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [offlineMode, setOfflineMode] = useState(true);
 
   let inputRef = useRef(null);
   let isInputFocusedRef = useRef(false);
@@ -267,6 +268,7 @@ function App() {
         "totalSeconds",
         "itemName",
         "muteMode",
+        "offlineMode",
       ],
       (data) => {
         setItemObject(data.itemName);
@@ -285,6 +287,7 @@ function App() {
         });
         setUserName(data.userName);
         setMuteMode(data.muteMode);
+        setOfflineMode(data.offlineMode);
         isInInitialization.current = false;
       }
     );
@@ -418,8 +421,19 @@ function App() {
             )}
           </b>
         </a>
-        <a onClick={timeAddHandler} className="mode">
-          In Sync
+        <a
+          onClick={() =>
+            setOfflineMode((prevState) => {
+              chrome.storage.sync.set({
+                // could be a buggy area of implementation
+                offlineMode: !prevState,
+              }); // </ unsafe>
+              return !prevState;
+            })
+          }
+          className={offlineMode === true ? "offlineMode" : "mode"}
+        >
+          {offlineMode === true ? "Off grid" : "Synced Mode"}
         </a>
       </div>
       {/* off grid */}
@@ -427,6 +441,10 @@ function App() {
         <div
           onClick={() => {
             switchMuteMode();
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault(); // cancel right click menu
+            timeAddHandler(); // start handling time addition after right click
           }}
           className="stats seperated datasection"
         >

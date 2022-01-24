@@ -56,6 +56,23 @@ body {
   color: #ffbad6;
 }
 
+.offlineMode {
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 12px;
+  line-height: 16px;
+  background-color: #badfff;
+  color: #1976f0;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  text-transform: capitalize;
+  font-weight: 700;
+}
+.offlineMode:hover {
+  background-color: #1976f0;
+  color: #badfff;
+}
+
 .Card-layout {
   border-bottom: 1px solid #2f3237;
   display: block;

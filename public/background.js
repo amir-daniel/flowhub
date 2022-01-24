@@ -9,6 +9,8 @@ let etaMode = false;
 let userName = "River";
 let itemName = null;
 let muteMode = false;
+let offlineMode = true;
+
 const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
 let mode = 0; // for now it's local, and not accessable from the popup
@@ -257,6 +259,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ mode });
   chrome.storage.sync.set({ itemName });
   chrome.storage.sync.set({ muteMode });
+  chrome.storage.sync.set({ offlineMode });
 });
 
 chrome.commands.onCommand.addListener((command) => {
