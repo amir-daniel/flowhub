@@ -11,6 +11,7 @@ function draw() {
     if (!created) {
       var progressContainer = document.createElement("div");
       progressContainer.className = "pc";
+      progressContainer.style.visibility = "hidden"; // start hidden
       progressContainer.id = "pc";
 
       var scrollbar = document.createElement("div");
