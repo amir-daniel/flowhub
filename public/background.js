@@ -10,10 +10,12 @@ let userName = "River";
 let itemName = null;
 let muteMode = true;
 let offlineMode = true;
+let percentageMode = true;
 
 const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
-let mode = 0; // for now it's local, and not accessable from the popup
+let mode = 0; // decides whether mode is Elapsed time or ETA
+// for now it's local, and not accessable from the popup (UPDATE: accessible from a shortcut)
 const unknownETAChar = "∞";
 
 const showErrorMsg = (msg, checkMute = false) => {
@@ -260,6 +262,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ itemName });
   chrome.storage.sync.set({ muteMode });
   chrome.storage.sync.set({ offlineMode });
+  chrome.storage.sync.set({ percentageMode });
 });
 
 chrome.commands.onCommand.addListener((command) => {
@@ -337,6 +340,12 @@ chrome.commands.onCommand.addListener((command) => {
         }
       }
     );
+  } else if (command === "pct-view") {
+    chrome.storage.sync.get(["percentageMode"], (data) => {
+      chrome.storage.sync.set({
+        percentageMode: data.percentageMode === true ? false : true,
+      });
+    });
   }
 });
 
@@ -349,7 +358,7 @@ const updateStats = (receivedMessage) => {
     var currTab = tabs[0];
     if (currTab) {
       chrome.storage.sync.get(
-        ["start", "progress", "end", "startedRecordingAt"],
+        ["start", "progress", "end", "startedRecordingAt", "percentageMode"],
         (data) => {
           if (data.startedRecordingAt === null) {
             if (data.end === data.start) {
@@ -358,22 +367,30 @@ const updateStats = (receivedMessage) => {
               chrome.tabs.sendMessage(currTab.id, {
                 val: 1,
                 msg: receivedMessage,
+                percentageMode: data.percentageMode,
+                progress: data.progress,
               });
             } else {
               chrome.tabs.sendMessage(currTab.id, {
                 val: (data.progress - data.start) / (data.end - data.start),
                 msg: receivedMessage,
+                percentageMode: data.percentageMode,
+                progress: data.progress,
               });
             }
           } else if (data.end - data.start === 0) {
             chrome.tabs.sendMessage(currTab.id, {
               val: 0,
               msg: receivedMessage,
+              percentageMode: data.percentageMode,
+              progress: data.progress,
             });
           } else {
             chrome.tabs.sendMessage(currTab.id, {
               val: (data.progress - data.start) / (data.end - data.start),
               msg: receivedMessage,
+              percentageMode: data.percentageMode,
+              progress: data.progress,
             });
           }
         }
@@ -418,7 +435,8 @@ chrome.storage.onChanged.addListener((changes) => {
     "start" in changes ||
     "progress" in changes ||
     "end" in changes ||
-    "startedRecordingAt" in changes
+    "startedRecordingAt" in changes ||
+    "percentageMode" in changes // in case of pctMode change
   ) {
     if ("progress" in changes) {
       updateStats();

@@ -39,15 +39,21 @@
     },
     "progress-up": {
       "suggested_key": {
-        "default": "Ctrl+PageUp"
+        "default": "Ctrl+Shift+D"
       },
       "description": "Increment progress by 1"
     },
     "change-view": {
       "suggested_key": {
-        "default": "Ctrl+PageDown"
+        "default": "Ctrl+Shift+X"
       },
       "description": "Change Badge view (ETA vs. time elapsed)"
+    },
+    "pct-view": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+W"
+      },
+      "description": "Change percentage view"
     }
   },
 

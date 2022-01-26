@@ -37,14 +37,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
     // let textColor =
     //   +msg.val >= 0.978 ? "#09492A" : +msg.val >= 0.33 ? "#AA5B00" : "#821226";
 
+    let injectedText = msg.percentageMode
+      ? Math.floor(+msg.val * 100) + "%"
+      : msg.progress;
+
     document.querySelector(
       ".bg"
     ).style.background = `conic-gradient(${backgroundColor} ${
       +msg.val * 360
     }deg, #ddd ${+msg.val * 360}deg)`;
+
     document.getElementById("ol").innerHTML =
-      `<span style="color:${backgroundColor}">` +
-      Math.floor(+msg.val * 100) +
-      "%</span>";
+      `<span style="color:${backgroundColor}">` + injectedText + "</span>";
   }
 });
