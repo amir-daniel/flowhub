@@ -15,6 +15,7 @@ function notify(msg) {
     });
   }
 }
+let timerID = null;
 
 chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
   var progressContainer = document.getElementById("pc");
@@ -49,5 +50,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
 
     document.getElementById("ol").innerHTML =
       `<span style="color:${backgroundColor}">` + injectedText + "</span>";
+
+    if (!msg.percentageMode) {
+      if (timerID !== null) {
+        clearTimeout(timerID);
+      }
+      timerID = setTimeout(() => {
+        injectedText = Math.floor(+msg.val * 100) + "%";
+
+        document.getElementById("ol").innerHTML =
+          `<span style="color:${backgroundColor}">` + injectedText + "</span>";
+
+        timerID = null;
+      }, 2500);
+    }
   }
 });

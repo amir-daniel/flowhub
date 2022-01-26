@@ -10,7 +10,7 @@ let userName = "River";
 let itemName = null;
 let muteMode = true;
 let offlineMode = true;
-let percentageMode = true;
+let percentageMode = false;
 
 const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
