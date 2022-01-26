@@ -217,13 +217,13 @@ const updateTimerState = () => {
   );
 };
 
-const stopTimerIfQuestComplete = (progress, end) => {
+const stopTimerIfQuestComplete = (progress, end, startedRecordingAt) => {
   if (progress === end) {
     chrome.alarms.clearAll();
     chrome.storage.sync.set(
       {
         startedRecordingAt: null,
-        savedTime: (Date.now() - data.startedRecordingAt) / 1000,
+        savedTime: (Date.now() - startedRecordingAt) / 1000,
       },
       () => {
         updateTimerState();
@@ -333,7 +333,11 @@ chrome.commands.onCommand.addListener((command) => {
             });
           }
 
-          stopTimerIfQuestComplete(data.progress + 1, data.end);
+          stopTimerIfQuestComplete(
+            data.progress + 1,
+            data.end,
+            data.startedRecordingAt
+          );
         } else {
           chrome.notifications.create({
             type: "progress",
