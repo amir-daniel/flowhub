@@ -217,6 +217,21 @@ const updateTimerState = () => {
   );
 };
 
+const stopTimerIfQuestComplete = (progress, end) => {
+  if (progress === end) {
+    chrome.alarms.clearAll();
+    chrome.storage.sync.set(
+      {
+        startedRecordingAt: null,
+        savedTime: (Date.now() - data.startedRecordingAt) / 1000,
+      },
+      () => {
+        updateTimerState();
+      }
+    );
+  }
+};
+
 const getETA = (progress, itemMin, itemMax, time) => {
   let totalProgress = progress - itemMin;
   let progressLeft = itemMax - progress;
@@ -317,18 +332,8 @@ chrome.commands.onCommand.addListener((command) => {
                     ),
             });
           }
-          if (data.progress + 1 === data.end) {
-            chrome.alarms.clearAll();
-            chrome.storage.sync.set(
-              {
-                startedRecordingAt: null,
-                savedTime: (Date.now() - data.startedRecordingAt) / 1000,
-              },
-              () => {
-                updateTimerState();
-              }
-            );
-          }
+
+          stopTimerIfQuestComplete(data.progress + 1, data.end);
         } else {
           chrome.notifications.create({
             type: "progress",
