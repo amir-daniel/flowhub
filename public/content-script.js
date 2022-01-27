@@ -62,7 +62,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
           `<span style="color:${backgroundColor}">` + injectedText + "</span>";
 
         timerID = null;
-      }, 2500);
+      }, 2000);
     }
   }
 });

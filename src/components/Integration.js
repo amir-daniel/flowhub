@@ -165,7 +165,7 @@ export const fetchItemData = async (offlineMode) => {
       return [null, null, "force-hide"];
     }
   } else {
-    alert(`can't fetch data in Off Grid mode!`);
+    // alert(`can't fetch data in Off Grid mode!`);
     return [null, null, "force-hide"];
   }
 };
