@@ -39,8 +39,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
     //   +msg.val >= 0.978 ? "#09492A" : +msg.val >= 0.33 ? "#AA5B00" : "#821226";
 
     let injectedText = msg.percentageMode
+      ? msg.progress
+      : msg.eta === undefined
       ? Math.floor(+msg.val * 100) + "%"
-      : msg.progress;
+      : msg.eta;
 
     document.querySelector(
       ".bg"
@@ -51,7 +53,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
     document.getElementById("ol").innerHTML =
       `<span style="color:${backgroundColor}">` + injectedText + "</span>";
 
-    if (!msg.percentageMode) {
+    if (msg.percentageMode) {
       if (timerID !== null) {
         clearTimeout(timerID);
       }

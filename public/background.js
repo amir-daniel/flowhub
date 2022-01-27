@@ -10,7 +10,7 @@ let userName = "River";
 let itemName = null;
 let muteMode = true;
 let offlineMode = true;
-let percentageMode = false;
+let percentageMode = true;
 
 const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
@@ -232,10 +232,10 @@ const stopTimerIfQuestComplete = (progress, end, startedRecordingAt) => {
   }
 };
 
-const getETA = (progress, itemMin, itemMax, time) => {
+const getETA = (progress, itemMin, itemMax, time, specialFormatting) => {
   let totalProgress = progress - itemMin;
   let progressLeft = itemMax - progress;
-  let totalMins = time / 60;
+  let totalMins = time / 60; // time is measured in seconds
 
   if (
     time < 1 ||
@@ -261,6 +261,13 @@ const getETA = (progress, itemMin, itemMax, time) => {
       : designDigit(ETADate.getHours()) +
         ":" +
         designDigit(ETADate.getMinutes());
+
+  if (specialFormatting === true) {
+    dateFormatted =
+      ETADate === null
+        ? unknownETAChar
+        : Math.round((minsLeft / 60) * 10) / 10 + "h"; // get hours in %.% format for special formatting
+  }
 
   return dateFormatted;
 };
@@ -367,7 +374,14 @@ const updateStats = (receivedMessage) => {
     var currTab = tabs[0];
     if (currTab) {
       chrome.storage.sync.get(
-        ["start", "progress", "end", "startedRecordingAt", "percentageMode"],
+        [
+          "start",
+          "progress",
+          "end",
+          "startedRecordingAt",
+          "savedTime",
+          "percentageMode",
+        ],
         (data) => {
           if (data.startedRecordingAt === null) {
             if (data.end === data.start) {
@@ -385,6 +399,13 @@ const updateStats = (receivedMessage) => {
                 msg: receivedMessage,
                 percentageMode: data.percentageMode,
                 progress: data.progress,
+                eta: getETA(
+                  data.progress,
+                  data.start,
+                  data.end,
+                  data.savedTime,
+                  true // special formatting flag -> ON
+                ),
               });
             }
           } else if (data.end - data.start === 0) {
@@ -393,6 +414,7 @@ const updateStats = (receivedMessage) => {
               msg: receivedMessage,
               percentageMode: data.percentageMode,
               progress: data.progress,
+              eta: unknownETAChar,
             });
           } else {
             chrome.tabs.sendMessage(currTab.id, {
@@ -400,6 +422,12 @@ const updateStats = (receivedMessage) => {
               msg: receivedMessage,
               percentageMode: data.percentageMode,
               progress: data.progress,
+              eta: getETA(
+                data.progress,
+                data.start,
+                data.end,
+                (Date.now() - data.startedRecordingAt) / 1000
+              ),
             });
           }
         }
