@@ -424,15 +424,19 @@ function App() {
           </b>
         </a>
         <a
-          onClick={() =>
-            setOfflineMode((prevState) => {
-              chrome.storage.sync.set({
-                // could be a buggy area of implementation
-                offlineMode: !prevState,
-              }); // </ unsafe>
-              return !prevState;
-            })
-          }
+          onClick={() => {
+            if (dataState.timerID !== false) {
+              alert(`Can't move between states while recording`);
+            } else {
+              setOfflineMode((prevState) => {
+                chrome.storage.sync.set({
+                  // could be a buggy area of implementation
+                  offlineMode: !prevState,
+                }); // </ unsafe>
+                return !prevState;
+              });
+            }
+          }}
           className={offlineMode === true ? "offlineMode" : "mode"}
         >
           {offlineMode === true ? "Off grid" : "Synced Mode"}
