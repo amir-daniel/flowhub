@@ -197,13 +197,13 @@ const updateTimerState = () => {
               // show infinity as ETA in that case
               text:
                 data.progress === data.end && data.start !== data.progress
-                  ? "✅"
+                  ? "✓"
                   : unknownETAChar,
             });
           }
         } else {
           // not recording but no time is saved
-          chrome.action.setBadgeText({ text: "?" });
+          chrome.action.setBadgeText({ text: "" });
         }
       } else {
         if (data.mode === 0) {
