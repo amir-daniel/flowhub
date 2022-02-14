@@ -310,20 +310,21 @@ chrome.commands.onCommand.addListener((command) => {
               type: "progress",
               iconUrl: "/images/get_started128.png",
               title: "River",
-              message: `Hi there, just wanted to let you know that your progress ${
+              message: `Progress: ${data.progress + 1}
+              ${
                 data.progress + 1 === data.end // it's progress + 1,
                   ? // noticed that we incremented it a few lines ago
-                    "was staggering, and you are done! ✅"
+                    "ETA: ✅"
                   : data.mode === 0
-                  ? `is staggering, and you are destined to be done at ${getETA(
+                  ? `ETA: ${getETA(
                       data.progress + 1,
                       data.start,
                       data.end,
                       (Date.now() - data.startedRecordingAt) / 1000
                     )}.`
-                  : `is staggering, and you have already amassed a time of ${beautifyForBadge(
+                  : `Elapsed: ${beautifyForBadge(
                       (Date.now() - data.startedRecordingAt) / 1000
-                    )}. Your progress checkpoint is ${data.progress + 1}.`
+                    )}.`
               } `,
               progress:
                 data.end === 0
