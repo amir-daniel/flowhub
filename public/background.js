@@ -320,7 +320,7 @@ chrome.commands.onCommand.addListener((command) => {
                       data.start,
                       data.end,
                       (Date.now() - data.startedRecordingAt) / 1000
-                    )}.`
+                    )}`
                   : `Elapsed: ${beautifyForBadge(
                       (Date.now() - data.startedRecordingAt) / 1000
                     )}.`
