@@ -1,14 +1,21 @@
 /*global chrome*/
 
 // later possible to add: "which integration: monday, ..., and also option to add private key"
-const showErrorMsg = (msg) => {
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: "/images/get_started128.png",
-    title: "River",
-    message: msg,
-  });
+const showErrorMsg = (msg, checkMute = false) => {
+  if (checkMute === true) {
+    chrome.storage.sync.get(["muteMode"], (data) => {
+      if (data.muteMode !== true) {
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "/images/get_started128.png",
+          title: "River",
+          message: msg,
+        });
+      }
+    });
+  }
 };
+
 export const StartRecordingOut = async (itemID, offlineMode) => {
   if (offlineMode !== true) {
     let query5 = `mutation ($data: JSON!) {
@@ -19,7 +26,7 @@ export const StartRecordingOut = async (itemID, offlineMode) => {
     let vars;
     vars = {
       data: JSON.stringify({
-        status: "Staged",
+        status: "Quest in Progress",
       }),
     };
 
@@ -46,7 +53,7 @@ export const StartRecordingOut = async (itemID, offlineMode) => {
           showErrorMsg("Item update was rejected by Monday!");
           return "force-hide";
         } else {
-          showErrorMsg("Item sync was successful!");
+          showErrorMsg("Item sync was successful!", true);
           return false;
         }
       })
