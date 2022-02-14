@@ -19,7 +19,7 @@ export const StartRecordingOut = async (itemID, offlineMode) => {
     let vars;
     vars = {
       data: JSON.stringify({
-        status: "Recording",
+        status: "Quest in Progress",
       }),
     };
 
