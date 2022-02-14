@@ -19,7 +19,7 @@ export const StartRecordingOut = async (itemID, offlineMode) => {
     let vars;
     vars = {
       data: JSON.stringify({
-        status: "Quest in Progress",
+        status: "Staged",
       }),
     };
 
@@ -64,7 +64,7 @@ export const fetchItemData = async (offlineMode) => {
   if (offlineMode !== true) {
     let res;
     let query = `{
-      items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress") {
+      items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Staged") {
   
         column_values(ids: ["numbers", "numbers_1"]) {
           id

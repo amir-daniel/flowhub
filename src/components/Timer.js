@@ -10,7 +10,7 @@ const Timer = (props) => {
     if (props.offlineMode !== true) {
       // arabic work ahead **WARNING** REFACTOR !!!!
       let query = `{
-      items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Quest in Progress") {
+      items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Staged") {
         name
         id
         column_values(ids: "time_tracking") {
