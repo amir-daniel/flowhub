@@ -310,8 +310,7 @@ chrome.commands.onCommand.addListener((command) => {
               type: "progress",
               iconUrl: "/images/get_started128.png",
               title: "River",
-              message: `Progress: ${data.progress + 1}
-              ${
+              message: `Progress: ${data.progress + 1}\n${
                 data.progress + 1 === data.end // it's progress + 1,
                   ? // noticed that we incremented it a few lines ago
                     "ETA: ✅"
