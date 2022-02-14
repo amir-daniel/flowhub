@@ -105,11 +105,13 @@ body {
 }
 
 .data-input-offline {
-  color: #badfff;
+  /* color: #badfff; */
+  color: #ebb82d;
 }
 
 .data-input-online {
-  color: #ffbad6;
+  /* color: #ffbad6; */
+  color: #ebb82d;
 }
 
 .data-input::placeholder {
