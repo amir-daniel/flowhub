@@ -315,7 +315,7 @@ chrome.commands.onCommand.addListener((command) => {
                   ? // noticed that we incremented it a few lines ago
                     "ETA: ✅"
                   : data.mode === 0
-                  ? `ETA: ${getETA(
+                  ? `ETA: 🔔 ${getETA(
                       data.progress + 1,
                       data.start,
                       data.end,
