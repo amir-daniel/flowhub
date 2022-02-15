@@ -51,8 +51,7 @@ const stopRecordingAndWriteOut = async (
       start === current
         ? {
             data: JSON.stringify({
-              status:
-                end === current && start !== end ? "Quest Complete" : "Staged",
+              status: "Staged",
             }),
           }
         : {
