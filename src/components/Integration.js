@@ -53,7 +53,7 @@ export const StartRecordingOut = async (itemID, offlineMode) => {
           showErrorMsg("Item update was rejected by Monday!");
           return "force-hide";
         } else {
-          showErrorMsg("Item sync was successful!", true);
+          // showErrorMsg("Item sync was successful!", true);
           return false;
         }
       })
