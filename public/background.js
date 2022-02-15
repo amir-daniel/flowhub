@@ -88,7 +88,7 @@ const stopRecordingAndWriteOut = async (
           );
           return "force-hide";
         } else {
-          // showErrorMsg("Item was successful!", true);
+          showErrorMsg("Item sync was successful!", true);
           return false;
         }
       })
