@@ -267,6 +267,70 @@ const getETA = (progress, itemMin, itemMax, time, specialFormatting) => {
   return dateFormatted;
 };
 
+const applyProgressUp = () => {
+  chrome.storage.sync.get(
+    [
+      "start",
+      "progress",
+      "end",
+      "startedRecordingAt",
+      "savedTime",
+      "mode",
+      "muteMode",
+    ],
+    (data) => {
+      if (data.progress < data.end && data.startedRecordingAt !== null) {
+        chrome.storage.sync.set({ progress: data.progress + 1 });
+        // don't forget to update in Timer.js the checker
+        if (data.muteMode === false) {
+          chrome.notifications.create({
+            type: "progress",
+            iconUrl: "/images/get_started128.png",
+            title: "River",
+            message: `Progress: ${data.progress + 1}\n${
+              data.progress + 1 === data.end // it's progress + 1,
+                ? // noticed that we incremented it a few lines ago
+                  "ETA: ✅"
+                : data.mode === 0
+                ? `ETA: 🔔 ${getETA(
+                    data.progress + 1,
+                    data.start,
+                    data.end,
+                    (Date.now() - data.startedRecordingAt) / 1000
+                  )}`
+                : `Elapsed: ${beautifyForBadge(
+                    (Date.now() - data.startedRecordingAt) / 1000
+                  )}.`
+            } `,
+            progress:
+              data.end === 0
+                ? 0
+                : Math.floor(
+                    ((data.progress + 1 - data.start) /
+                      (data.end - data.start)) *
+                      100
+                  ),
+          });
+        }
+
+        stopTimerIfQuestComplete(
+          data.progress + 1,
+          data.end,
+          data.startedRecordingAt
+        );
+      } else {
+        chrome.notifications.create({
+          type: "progress",
+          iconUrl: "/images/get_started128.png",
+          title: "River",
+          message: "Something went wrong!",
+          progress: 0,
+        });
+      }
+    }
+  );
+};
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.sync.set({ start });
   chrome.storage.sync.set({ progress });
@@ -290,67 +354,7 @@ chrome.commands.onCommand.addListener((command) => {
       });
     });
   } else if (command === "progress-up") {
-    chrome.storage.sync.get(
-      [
-        "start",
-        "progress",
-        "end",
-        "startedRecordingAt",
-        "savedTime",
-        "mode",
-        "muteMode",
-      ],
-      (data) => {
-        if (data.progress < data.end && data.startedRecordingAt !== null) {
-          chrome.storage.sync.set({ progress: data.progress + 1 });
-          // don't forget to update in Timer.js the checker
-          if (data.muteMode === false) {
-            chrome.notifications.create({
-              type: "progress",
-              iconUrl: "/images/get_started128.png",
-              title: "River",
-              message: `Progress: ${data.progress + 1}\n${
-                data.progress + 1 === data.end // it's progress + 1,
-                  ? // noticed that we incremented it a few lines ago
-                    "ETA: ✅"
-                  : data.mode === 0
-                  ? `ETA: 🔔 ${getETA(
-                      data.progress + 1,
-                      data.start,
-                      data.end,
-                      (Date.now() - data.startedRecordingAt) / 1000
-                    )}`
-                  : `Elapsed: ${beautifyForBadge(
-                      (Date.now() - data.startedRecordingAt) / 1000
-                    )}.`
-              } `,
-              progress:
-                data.end === 0
-                  ? 0
-                  : Math.floor(
-                      ((data.progress + 1 - data.start) /
-                        (data.end - data.start)) *
-                        100
-                    ),
-            });
-          }
-
-          stopTimerIfQuestComplete(
-            data.progress + 1,
-            data.end,
-            data.startedRecordingAt
-          );
-        } else {
-          chrome.notifications.create({
-            type: "progress",
-            iconUrl: "/images/get_started128.png",
-            title: "River",
-            message: "Something went wrong!",
-            progress: 0,
-          });
-        }
-      }
-    );
+    applyProgressUp();
   } else if (command === "pct-view") {
     chrome.storage.sync.get(["percentageMode"], (data) => {
       chrome.storage.sync.set({
