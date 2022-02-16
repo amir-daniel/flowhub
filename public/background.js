@@ -16,7 +16,7 @@ const ELAPSED_MODE = 0;
 const ETA_MODE = 1;
 let mode = 0; // decides whether mode is Elapsed time or ETA
 // for now it's local, and not accessable from the popup (UPDATE: accessible from a shortcut)
-const unknownETAChar = "♾️";
+const unknownETAChar = "∞";
 
 const showErrorMsg = (msg, checkMute = false) => {
   if (checkMute === true) {

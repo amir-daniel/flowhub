@@ -15,7 +15,6 @@ function notify(msg) {
     });
   }
 }
-let timerID = null;
 
 chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
   var progressContainer = document.getElementById("pc");
@@ -35,14 +34,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
         : +msg.val >= 0.33
         ? "#ffdb3a"
         : "#e5405e";
-    // let textColor =
-    //   +msg.val >= 0.978 ? "#09492A" : +msg.val >= 0.33 ? "#AA5B00" : "#821226";
 
-    let injectedText = msg.percentageMode
-      ? msg.progress
-      : msg.eta === undefined
-      ? Math.floor(+msg.val * 100) + "%"
-      : msg.eta;
+    let injectedText =
+      msg.percentageMode || msg.eta === undefined
+        ? Math.floor(+msg.val * 100) + "%"
+        : msg.eta;
 
     document.querySelector(
       ".bg"
@@ -53,18 +49,22 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
     document.getElementById("ol").innerHTML =
       `<span style="color:${backgroundColor}">` + injectedText + "</span>";
 
-    if (msg.percentageMode) {
-      if (timerID !== null) {
-        clearTimeout(timerID);
-      }
-      timerID = setTimeout(() => {
-        injectedText = Math.floor(+msg.val * 100) + "%";
+    progressContainer.onmouseenter = () => {
+      injectedText = msg.progress;
 
-        document.getElementById("ol").innerHTML =
-          `<span style="color:${backgroundColor}">` + injectedText + "</span>";
+      document.getElementById("ol").innerHTML =
+        `<span style="color:${backgroundColor}">` + injectedText + "</span>";
+    };
 
-        timerID = null;
-      }, 2000);
-    }
+    progressContainer.onmouseleave = () => {
+      injectedText =
+        msg.percentageMode || msg.eta === undefined
+          ? Math.floor(+msg.val * 100) + "%"
+          : msg.eta;
+
+      document.getElementById("ol").innerHTML =
+        `<span style="color:${backgroundColor}">` + injectedText + "</span>";
+    };
+    // timeout was 2000 ms
   }
 });
