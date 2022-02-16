@@ -494,6 +494,10 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
   updateStats("no-audio");
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  updateStats("no-audio");
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg === "progress-up") {
+    applyProgressUp();
+  } else {
+    updateStats("no-audio");
+  }
 });

@@ -13,6 +13,9 @@ function draw() {
       progressContainer.className = "pc";
       progressContainer.style.visibility = "hidden"; // start hidden
       progressContainer.id = "pc";
+      progressContainer.onclick = () => {
+        chrome.runtime.sendMessage("progress-up");
+      };
 
       var scrollbar = document.createElement("div");
       scrollbar.className = "ol";
