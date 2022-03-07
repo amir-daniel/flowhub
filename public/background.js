@@ -33,12 +33,13 @@ const showErrorMsg = (msg, checkMute = false) => {
   }
 };
 
-const stopRecordingAndWriteOut = async (
+const updateMondayItemValues = async (
   itemID,
   start,
   current,
   end,
-  integrationEnabled
+  integrationEnabled,
+  haltOperation = true
 ) => {
   if (integrationEnabled === true) {
     let query5 = `mutation ($data: JSON!) {
@@ -47,20 +48,32 @@ const stopRecordingAndWriteOut = async (
         }
       }`;
     let vars;
-    vars =
-      start === current
-        ? {
-            data: JSON.stringify({
-              status: "Staged",
-            }),
-          }
-        : {
-            data: JSON.stringify({
-              status:
-                end === current && start !== end ? "Quest Complete" : "Staged",
-              numbers: +current,
-            }),
-          };
+    //default value
+    if (haltOperation === true) {
+      vars =
+        start === current
+          ? {
+              data: JSON.stringify({
+                status: "Staged",
+              }),
+            }
+          : {
+              data: JSON.stringify({
+                status:
+                  end === current && start !== end
+                    ? "Quest Complete"
+                    : "Staged",
+                numbers: +current,
+              }),
+            };
+      // otherwise, let recording keep going, don't intervene with item's Status
+    } else {
+      vars = {
+        data: JSON.stringify({
+          numbers: +current,
+        }),
+      };
+    }
 
     fetch("https://api.monday.com/v2", {
       method: "post",
@@ -454,7 +467,7 @@ chrome.storage.onChanged.addListener((changes) => {
           if (data?.itemName?.id !== undefined) {
             // notice that if value changes manually through popup while recording is not on, syncing will not take place
             console.log(data.progress);
-            stopRecordingAndWriteOut(
+            updateMondayItemValues(
               data.itemName?.id,
               data.start,
               data.progress,
@@ -465,6 +478,29 @@ chrome.storage.onChanged.addListener((changes) => {
         }
       );
     }
+  } else if ("progress" in changes) {
+    chrome.storage.sync.get(
+      [
+        "startedRecordingAt",
+        "start",
+        "progress",
+        "end",
+        "itemName",
+        "offlineMode",
+      ],
+      (data) => {
+        if (data?.itemName?.id !== undefined) {
+          updateMondayItemValues(
+            data.itemName?.id,
+            data.start,
+            data.progress,
+            data.end,
+            !data.offlineMode,
+            false
+          );
+        }
+      }
+    );
   }
 
   if (
