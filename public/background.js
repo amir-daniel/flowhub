@@ -393,6 +393,7 @@ const updateStats = (receivedMessage) => {
           "startedRecordingAt",
           "savedTime",
           "percentageMode",
+          "offlineMode",
         ],
         (data) => {
           if (data.startedRecordingAt === null) {
@@ -404,6 +405,7 @@ const updateStats = (receivedMessage) => {
                 msg: receivedMessage,
                 percentageMode: data.percentageMode,
                 progress: data.progress,
+                integrationEnabled: !data.offlineMode,
               });
             } else {
               chrome.tabs.sendMessage(currTab.id, {
@@ -418,6 +420,7 @@ const updateStats = (receivedMessage) => {
                   data.savedTime,
                   true // special formatting flag -> ON
                 ),
+                integrationEnabled: !data.offlineMode,
               });
             }
           } else if (data.end - data.start === 0) {
@@ -427,6 +430,7 @@ const updateStats = (receivedMessage) => {
               percentageMode: data.percentageMode,
               progress: data.progress,
               eta: unknownETAChar,
+              integrationEnabled: !data.offlineMode,
             });
           } else {
             chrome.tabs.sendMessage(currTab.id, {
@@ -440,6 +444,7 @@ const updateStats = (receivedMessage) => {
                 data.end,
                 (Date.now() - data.startedRecordingAt) / 1000
               ),
+              integrationEnabled: !data.offlineMode,
             });
           }
         }
@@ -507,6 +512,7 @@ chrome.storage.onChanged.addListener((changes) => {
     "start" in changes ||
     "progress" in changes ||
     "end" in changes ||
+    "offlineMode" in changes || // to make circular progress bar disappear according to sync mode
     "startedRecordingAt" in changes ||
     "percentageMode" in changes // in case of pctMode change
   ) {

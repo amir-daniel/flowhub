@@ -25,7 +25,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
     if (msg.msg !== "no-audio") {
       notify(+msg.val);
     }
-    progressContainer.style.visibility = "visible";
+    progressContainer.style.visibility =
+      msg.integrationEnabled === true ? "hidden" : "visible";
+
     let backgroundColor =
       +msg.val >= 0.978
         ? "#3fffa2"
