@@ -145,6 +145,7 @@ function App() {
       chrome.storage.sync.set({
         startedRecordingAt: null,
         savedTime: null,
+        itemName: null,
         totalSeconds: accumulatedTime,
       });
       return {
@@ -413,14 +414,22 @@ function App() {
       <div className="Card-header">
         <a onClick={nameChangeHandler} className="headline">
           <b>
-            {dataState.timerID !== false &&
-            itemObject?.name !== null &&
-            itemObject?.name !== undefined &&
-            offlineMode === false ? (
-              <span style={{ color: "red" }}>{itemObject?.name}</span>
-            ) : (
-              "@" + getUserName
-            )}
+            {
+              //dataState.timerID !== false &&
+              itemObject?.name !== null &&
+              itemObject?.name !== undefined &&
+              offlineMode === false ? (
+                <span
+                  style={{
+                    color: dataState.timerID !== false ? "red" : "#981162",
+                  }}
+                >
+                  {itemObject?.name}
+                </span>
+              ) : (
+                "@" + getUserName
+              )
+            }
           </b>
         </a>
         <a
@@ -471,7 +480,7 @@ function App() {
               setIsBuffering(true);
 
               fetchItemData(offlineMode).then((res) => {
-                const [start, end, bufferingState] = res;
+                const [start, end, bufferingState, itemName] = res;
 
                 setIsBuffering(bufferingState);
 
@@ -482,6 +491,7 @@ function App() {
                     current: start,
                     end: end,
                   });
+                  setItemObject(itemName);
                 }
               });
             }

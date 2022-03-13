@@ -72,7 +72,8 @@ export const fetchItemData = async (offlineMode) => {
     let res;
     let query = `{
       items_by_column_values(board_id: 1774709998, column_id: "status", column_value: "Staged") {
-  
+        name
+        id
         column_values(ids: ["numbers", "numbers_1"]) {
           id
           value
@@ -103,11 +104,11 @@ export const fetchItemData = async (offlineMode) => {
         // add all messages to a json file, right now it's * ARABIC *
       });
 
-      return [null, null, "force-hide"];
+      return [null, null, "force-hide", null];
     }
 
     try {
-      let [start, end] = [
+      let [start, end, itemName] = [
         // add + or no? a conversion already happens at a later stage
         // so for now no, the only thing it does it remove data (loss of the ability to differentiate 0 and empty values)
         res?.["data"]?.["items_by_column_values"]?.[0]?.[
@@ -116,6 +117,10 @@ export const fetchItemData = async (offlineMode) => {
         res?.["data"]?.["items_by_column_values"]?.[0]?.[
           "column_values"
         ]?.[1]?.["value"],
+        {
+          name: res?.["data"]?.["items_by_column_values"]?.[0]?.["name"],
+          id: res?.["data"]?.["items_by_column_values"]?.[0]?.["id"],
+        },
       ];
 
       if (res?.["data"]?.["items_by_column_values"]?.length === 0) {
@@ -125,7 +130,7 @@ export const fetchItemData = async (offlineMode) => {
           title: "River",
           message: "No eligible quest was found on Monday!", // "Something went wrong!" message removed
         });
-        return [null, null, "force-hide"];
+        return [null, null, "force-hide", null];
       }
       if (start === undefined || end === undefined) {
         chrome.notifications.create({
@@ -134,7 +139,7 @@ export const fetchItemData = async (offlineMode) => {
           title: "River",
           message: "Connection rejected by Monday!", // "Something went wrong!" message removed
         });
-        return [null, null, "force-hide"];
+        return [null, null, "force-hide", null];
       } else if (res?.["data"]?.["items_by_column_values"]?.length > 1) {
         chrome.notifications.create({
           type: "basic",
@@ -143,7 +148,7 @@ export const fetchItemData = async (offlineMode) => {
           message:
             "More than one quest discovered. Currently no support for parallel items!", // check this works
         });
-        return [null, null, "force-hide"];
+        return [null, null, "force-hide", null];
       } else {
         start = +JSON.parse(start, null, 2);
         end = +JSON.parse(end, null, 2);
@@ -155,10 +160,13 @@ export const fetchItemData = async (offlineMode) => {
             title: "River",
             message: "Bad input received. Import failed!", // check this works
           });
-          return [null, null, "force-hide"];
+          return [null, null, "force-hide", null];
         } else {
           // success
-          return [start, end, "force-hide"];
+          await chrome.storage.sync.set({
+            itemName,
+          });
+          return [start, end, "force-hide", itemName];
         }
       }
     } catch (e) {
@@ -169,11 +177,11 @@ export const fetchItemData = async (offlineMode) => {
         message: "Something went wrong after connecting to Monday!",
       });
 
-      return [null, null, "force-hide"];
+      return [null, null, "force-hide", null];
     }
   } else {
     // alert(`can't fetch data in Off Grid mode!`);
-    return [null, null, "force-hide"];
+    return [null, null, "force-hide", null];
   }
 };
 
