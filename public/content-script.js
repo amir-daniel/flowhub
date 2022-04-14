@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
       notify(+msg.val);
     }
     progressContainer.style.visibility =
-      msg.integrationEnabled === true ? "hidden" : "visible";
+      msg.integrationEnabled === true ? "visible" : "visible";
 
     let backgroundColor =
       +msg.val >= 0.978
