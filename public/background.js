@@ -39,7 +39,8 @@ const updateMondayItemValues = async (
   current,
   end,
   integrationEnabled,
-  haltOperation = true
+  haltOperation = true,
+  startedRecordingAt = null
 ) => {
   if (integrationEnabled === true) {
     let query5 = `mutation ($data: JSON!) {
@@ -68,11 +69,22 @@ const updateMondayItemValues = async (
             };
       // otherwise, let recording keep going, don't intervene with item's Status
     } else {
-      vars = {
-        data: JSON.stringify({
-          numbers: +current,
-        }),
-      };
+      // it's the argument in this case
+      if (startedRecordingAt !== null) {
+        vars = {
+          data: JSON.stringify({
+            numbers: +current,
+            // ElapsedTime Column : In Minutes
+            numbers5: (Date.now() - startedRecordingAt) / 1000 / 60,
+          }),
+        };
+      } else {
+        vars = {
+          data: JSON.stringify({
+            numbers: +current,
+          }),
+        };
+      }
     }
 
     fetch("https://api.monday.com/v2", {
@@ -501,7 +513,8 @@ chrome.storage.onChanged.addListener((changes) => {
             data.progress,
             data.end,
             !data.offlineMode,
-            false
+            false,
+            data.startedRecordingAt
           );
         }
       }
