@@ -49,9 +49,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sndResponse) => {
     }deg, #ddd ${+msg.val * 360}deg)`;
 
     document.getElementById("ol").innerHTML =
-      `<span style="color:${backgroundColor};font-size:16px;">` +
-      injectedText +
-      "</span>";
+      `<span style="color:${backgroundColor};">` + injectedText + "</span>";
 
     progressContainer.onmouseenter = () => {
       injectedText = msg.progress;
